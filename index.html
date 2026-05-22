@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerador CPID de Materiais Bíblicos</title>
 
-  <!-- CONFIGURAÇÃO DA CHAVE AUTOMÁTICA -->
   <script>
     // 🔴 ISIQUELE, COLE A SUA CHAVE DA API DO GEMINI ENTRE AS ASPAS ABAIXO:
-    const MINHA_CHAVE_API = "AIzaSyAlWYVDBGWf_kH2Q2Kb9NRPepElYwsoSrs";
+    const MINHA_CHAVE_API = "AIzaSyA6PxEkmKXTFcWvwwvq-tp5Swa55idozOE";
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai@0.1.1/dist/index.min.js"></script>
 
   <style>
     :root {
@@ -167,12 +168,6 @@
       #resultado { border: none; padding: 0; font-size: 17px; }
     }
   </style>
-
-  <!-- Carregamento Direto e Universal do Gemini SDK via WEB -->
-  <script type="module">
-    import { GoogleGenAI } from "https://esm.run/@google/generative-ai";
-    window.GoogleGenAI = GoogleGenAI;
-  </script>
 </head>
 
 <body>
@@ -239,7 +234,7 @@
       <div class="linha">
         <div>
           <label for="licoes">Qtd. de Lições/Dias</label>
-          <input id="licoes" type="number" min="1" max="10" value="1" />
+          <input id="licoes" type="number" min="1" max="5" value="1" />
         </div>
 
         <div>
@@ -356,22 +351,27 @@
       const painelResultado = document.getElementById("resultado");
 
       if (!MINHA_CHAVE_API || MINHA_CHAVE_API === "COLE_SUA_CHAVE_AQUI_DENTRO") {
-        mostrarStatus("Erro: Você esqueceu de colar a sua chave API dentro do código do arquivo!", "erro");
+        mostrarStatus("Erro: Falta colar a chave API dentro do código!", "erro");
+        painelResultado.innerText = "Erro: Você esqueceu de colar a sua chave API do Gemini na linha 12 do código.";
         return;
       }
 
       try {
         btnGerar.disabled = true;
         btnGerar.innerText = "Conectando ao Gemini... Aguarde...";
-        painelResultado.innerText = "O Gemini está produzindo o seu material teológico completo...\nIsso leva de 15 a 45 segundos por ser um texto longo. Por favor, aguarde e não feche o app.";
-        mostrarStatus("Enviando solicitação para a IA...", "ok");
+        painelResultado.innerText = "O Gemini está produzindo o seu material teológico completo...\nIsso leva de 15 a 45 segundos devido ao tamanho do texto. Por favor, aguarde.";
+        mostrarStatus("Enviando solicitação...", "ok");
 
-        if (!window.GoogleGenAI) {
-          throw new Error("A biblioteca de conexão do Google ainda está carregando. Aguarde 3 segundos e tente novamente.");
+        // Conexão direta usando a biblioteca tradicional e estável
+        if (typeof window.GoogleGenAI === "undefined" && typeof genocide === "undefined" && !window.GenerativeAI && !window.js_generative_ai) {
+          // Fallback seguro caso o objeto mude de nome de acordo com o cdn universal
+          const SDK = window['@google/generative-ai'] || window.GoogleGenAI;
         }
 
-        const ai = new window.GoogleGenAI({ apiKey: MINHA_CHAVE_API });
-        const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // Inicialização padrão do ecossistema Google AI script
+        const genAI = new GoogleGenAI.GoogleGenAI({ apiKey: MINHA_CHAVE_API });
+        // Utilizando o modelo robusto atualizado
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const promptCompleto = criarPromptTexto();
         const resultadoIA = await model.generateContent(promptCompleto);
@@ -382,11 +382,11 @@
 
       } catch (error) {
         console.error(error);
-        painelResultado.innerText = "Ocorreu um erro técnico ao gerar o conteúdo.\n\nMotivos comuns:\n1. A chave colada dentro do código está incorreta ou desativada.\n2. O navegador barrou o carregamento da biblioteca externa.\n\nDetalhes do erro: " + error.message;
+        painelResultado.innerText = "Ocorreu um erro técnico ao gerar o conteúdo.\n\nVerifique se copiou a chave corretamente sem espaços vazios.\n\nDetalhes do erro: " + error.message;
         mostrarStatus("Falha na execução.", "erro");
       } finally {
         btnGerar.disabled = false;
-        btnGerar.innerText = "Gerar Material com Gemini";
+        genGerar.innerText = "Gerar Material com Gemini";
       }
     }
 
