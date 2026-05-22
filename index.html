@@ -13,294 +13,48 @@
       --bege: #f4efe6;
       --dourado: #c4974f;
       --branco: #ffffff;
-      --cinza: #444;
-      --borda: #ddd;
       --verde: #2e7d32;
       --vermelho: #b3261e;
     }
-
     * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bege);
-      color: #222;
-    }
-
-    header {
-      background: linear-gradient(135deg, var(--marrom), var(--marrom-claro));
-      color: white;
-      padding: 28px 20px;
-      text-align: center;
-      border-bottom: 5px solid var(--dourado);
-    }
-
-    header h1 { margin: 0; font-size: 30px; letter-spacing: 0.5px; }
-    header p { margin: 10px 0 0; font-size: 16px; opacity: 0.95; }
-
-    .container {
-      max-width: 1200px;
-      margin: 30px auto;
-      padding: 0 18px;
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 22px;
-    }
-
-    .card {
-      background: var(--branco);
-      border-radius: 14px;
-      padding: 22px;
-      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.10);
-      border: 1px solid #eee;
-    }
-
-    .card h2 {
-      margin-top: 0;
-      color: var(--marrom);
-      font-size: 22px;
-      border-bottom: 2px solid var(--dourado);
-      padding-bottom: 10px;
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-      color: var(--marrom);
-    }
-
-    input, select, textarea {
-      width: 100%;
-      margin-top: 7px;
-      padding: 12px;
-      border: 1px solid var(--borda);
-      border-radius: 9px;
-      font-size: 15px;
-      outline: none;
-      background: #fff;
-    }
-
-    textarea { resize: vertical; min-height: 90px; }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--dourado);
-      box-shadow: 0 0 0 2px rgba(196, 151, 79, 0.18);
-    }
-
-    .linha {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    button {
-      width: 100%;
-      border: none;
-      padding: 13px;
-      border-radius: 9px;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 12px;
-      transition: 0.2s;
-    }
-
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--bege); color: #222; }
+    header { background: linear-gradient(135deg, var(--marrom), var(--marrom-claro)); color: white; padding: 28px 20px; text-align: center; border-bottom: 5px solid var(--dourado); }
+    .container { max-width: 1200px; margin: 30px auto; padding: 0 18px; display: grid; grid-template-columns: 380px 1fr; gap: 22px; }
+    .card { background: var(--branco); border-radius: 14px; padding: 22px; box-shadow: 0 5px 18px rgba(0, 0, 0, 0.10); }
+    input, select, textarea { width: 100%; margin-top: 7px; padding: 12px; border: 1px solid #ddd; border-radius: 9px; }
+    button { width: 100%; border: none; padding: 13px; border-radius: 9px; cursor: pointer; margin-top: 12px; font-weight: bold; }
     .btn-principal { background: var(--marrom); color: white; }
-    .btn-principal:hover { background: var(--marrom-claro); }
-    .btn-secundario { background: var(--dourado); color: white; }
-    .btn-secundario:hover { filter: brightness(0.92); }
-    .btn-limpar { background: #eee; color: #333; }
-    .btn-limpar:hover { background: #ddd; }
-    .btn-copiar { background: var(--verde); color: white; }
-    .btn-copiar:hover { filter: brightness(0.92); }
-    .btn-imprimir { background: #263238; color: white; }
-    .btn-imprimir:hover { filter: brightness(1.15); }
-
-    #resultado {
-      background: #fffdf8;
-      border: 1px solid #eadcc2;
-      border-left: 6px solid var(--dourado);
-      border-radius: 10px;
-      padding: 22px;
-      line-height: 1.65;
-      font-size: 16px;
-      min-height: 500px;
-      color: #333;
-    }
-
-    #resultado h1, #resultado h2, #resultado h3 {
-      color: var(--marrom);
-      margin-top: 1.5em;
-      margin-bottom: 0.5em;
-    }
-    #resultado p { margin-bottom: 1em; }
-    #resultado strong { color: var(--marrom-claro); }
-
-    .status {
-      margin-top: 10px;
-      font-size: 14px;
-      font-weight: bold;
-      padding: 8px;
-      border-radius: 6px;
-      text-align: center;
-    }
-    .ok { color: var(--verde); background: #e8f5e9; }
-    .erro { color: var(--vermelho); background: #ffebee; }
-
-    .botoes {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    footer { text-align: center; color: #6b5a4d; padding: 20px; font-size: 14px; }
-
-    @media (max-width: 900px) {
-      .container { grid-template-columns: 1fr; }
-      .linha { grid-template-columns: 1fr; }
-      .botoes { grid-template-columns: 1fr; }
-    }
-
-    @media print {
-      body { background: white; }
-      header, .painel, footer, .botoes { display: none !important; }
-      .container { display: block; margin: 0; padding: 0; }
-      .card { box-shadow: none; border: none; }
-      #resultado { border: none; padding: 0; font-size: 17px; }
-    }
+    #resultado { background: #fffdf8; border-left: 6px solid var(--dourado); padding: 22px; min-height: 500px; }
+    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
   </style>
 </head>
 
 <body>
-  <header>
-    <h1>Gerador CPID de Materiais Bíblicos</h1>
-    <p>Crie lições, sermões, revistas de EBD e devocionais com Inteligência Artificial e Textos Originais</p>
-  </header>
+  <header><h1>Gerador CPID de Materiais Bíblicos</h1></header>
 
   <main class="container">
-    <section class="card painel">
+    <section class="card">
       <h2>Configurar Material</h2>
-      <label for="tipo">Tipo de material</label>
       <select id="tipo">
         <option value="revista_ebd">Revista de EBD</option>
-        <option value="licao_professor">Lição para Professor</option>
-        <option value="licao_aluno">Lição para Aluno</option>
-        <option value="apostila">Apostila Teológica</option>
         <option value="sermao">Sermão</option>
-        <option value="estudo_biblico">Estudo Bíblico</option>
-        <option value="livro">Livro Cristão</option>
-        <option value="devocional">Devocional</option>
       </select>
-
-      <label for="traducao">Tradução / Abordagem Bíblica</label>
-      <select id="traducao">
-        <option value="Almeida Revista e Corrigida (ARC)">Almeida Revista e Corrigida (ARC)</option>
-        <option value="Nova Versão Internacional (NVI)">Nova Versão Internacional (NVI)</option>
-        <option value="Nova Almeida Atualizada (NAA)">Nova Almeida Atualizada (NAA)</option>
-        <option value="Textos Originais (Hebraico/Grego)">Textos Originais (Hebraico/Grego) + Léxico Strong</option>
-        <option value="Linguagem de Hoje (NTLH)">Nova Tradução na Linguagem de Hoje (NTLH)</option>
-      </select>
-
-      <label for="titulo">Título do material</label>
-      <input id="titulo" type="text" placeholder="Ex: Em Defesa da Fé Cristã" />
-
-      <label for="tema">Tema principal</label>
-      <input id="tema" type="text" placeholder="Ex: Apologética cristã para jovens" />
-
-      <div class="linha">
-        <div>
-          <label for="publico">Público-alvo</label>
-          <select id="publico">
-            <option>Jovens</option>
-            <option>Adolescentes</option>
-            <option>Adultos</option>
-            <option>Novos Convertidos</option>
-            <option>Professores de EBD</option>
-            <option>Liderança da Igreja</option>
-          </select>
-        </div>
-        <div>
-          <label for="tom">Linguagem</label>
-          <select id="tom">
-            <option>Pastoral, bíblica e didática</option>
-            <option>Teológica e profunda</option>
-            <option>Simples e objetiva</option>
-            <option>Jovem e dinâmica</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="linha">
-        <div>
-          <label for="licoes">Qtd. de Lições/Dias</label>
-          <input id="licoes" type="number" min="1" max="5" value="1" />
-        </div>
-        <div>
-          <label for="perguntas">Perguntas por lição</label>
-          <input id="perguntas" type="number" min="1" max="10" value="5" />
-        </div>
-      </div>
-
-      <label for="textoBase">Texto bíblico base</label>
-      <input id="textoBase" type="text" placeholder="Ex: 1 Pedro 3.15; Judas 3" />
-
-      <label for="comentarista">Comentarista / Autor</label>
-      <input id="comentarista" type="text" placeholder="Ex: Pr. Isiquel Rodrigues" />
-
-      <label for="editora">Editora / Ministério</label>
-      <input id="editora" type="text" value="CPID - Casa Publicadora da Igreja de Deus" />
-
-      <label for="orientacoes">Orientações adicionais para a IA</label>
-      <textarea id="orientacoes" placeholder="Ex: trazer fatos históricos, focar na aplicação prática ou detalhar o contexto cultural da época."></textarea>
-
+      <input id="titulo" type="text" placeholder="Título">
       <button class="btn-principal" id="btnGerar" onclick="gerarMaterialComGemini()">Gerar Material com Gemini</button>
-
-      <div class="botoes">
-        <button class="btn-copiar" onclick="copiarResultado()">Copiar Texto</button>
-        <button class="btn-imprimir" onclick="window.print()">Imprimir / PDF</button>
-      </div>
-
-      <button class="btn-limpar" onclick="limparTudo()">Limpar Tudo</button>
-
       <div id="status" class="status"></div>
     </section>
-
-    <section class="card resultado-area">
+    <section class="card">
       <h2>Material Gerado</h2>
-      <div id="resultado">Preencha os campos ao lado e clique em “Gerar Material com Gemini”. O conteúdo aparecerá aqui de forma formatada.</div>
+      <div id="resultado">O resultado aparecerá aqui...</div>
     </section>
   </main>
 
-  <footer>
-    Sistema CPID Inteligente para criação de materiais bíblicos.
-  </footer>
   <script>
-    // 🔴 ISIQUELE, COLE A SUA CHAVE DA API DO GEMINI ENTRE AS ASPAS ABAIXO:
-    // Lembre-se: não compartilhe essa chave com ninguém!
+    // 🔴 COLE A SUA CHAVE DA API AQUI
     const MINHA_CHAVE_API = "AIzaSyCknZ9QzlIo4RpEjdUs5D3TdwF4A-02xCM";
 
-    function pegarValor(id) { 
-      return document.getElementById(id).value.trim(); 
-    }
-
     function criarPromptTexto() {
-      const tipo = pegarValor("tipo");
-      const traducao = pegarValor("traducao");
-      const titulo = pegarValor("titulo") || "Material Bíblico";
-      const tema = pegarValor("tema") || "Tema a definir";
-      const publico = pegarValor("publico");
-      const tom = pegarValor("tom");
-      const licoes = pegarValor("licoes") || "1";
-      const perguntas = pegarValor("perguntas") || "5";
-      const textoBase = pegarValor("textoBase") || "Texto bíblico a definir";
-      const comentarista = pegarValor("comentarista") || "Comentarista";
-      const editora = pegarValor("editora") || "Editora";
-      const orientacoes = pegarValor("orientacoes") || "Sem orientações adicionais.";
-
-      return `Você é um respeitado teólogo e exegeta. Escreva um material bíblico profissional de altíssimo nível doutrinário com base nestes dados:
-      Tipo: ${tipo}, Tradução: ${traducao}, Título: ${titulo}, Tema: ${tema}, Público: ${publico}, Tom: ${tom}, Qtd: ${licoes}, Perguntas: ${perguntas}, Texto Base: ${textoBase}, Autor: ${comentarista}, Editora: ${editora}, Observações: ${orientacoes}. 
-      Estruture com: Capa, Apresentação, Sumário, Lições detalhadas (Título, Texto Áureo, Verdade Prática, Leitura, Introdução, Desenvolvimento, Aplicação, Sinopse, Conclusão, ${perguntas} perguntas com respostas).`;
+      return `Escreva um material bíblico sobre: ${document.getElementById("titulo").value}`;
     }
 
     async function gerarMaterialComGemini() {
@@ -308,19 +62,17 @@
       const painel = document.getElementById("resultado");
       const statusDiv = document.getElementById("status");
 
-      if (!MINHA_CHAVE_API || MINHA_CHAVE_API.includes("COLE")) {
-        alert("Erro: Configure a sua chave da API no código antes de prosseguir.");
+      if (MINHA_CHAVE_API.includes("COLE")) {
+        alert("Erro: Configure a sua chave da API no código.");
         return;
       }
 
       btnGerar.disabled = true;
       btnGerar.innerText = "Processando...";
-      painel.innerHTML = "Consultando inteligência artificial, aguarde...";
-      statusDiv.className = "status";
-      statusDiv.innerText = "Conectando ao Gemini...";
+      painel.innerText = "Consultando inteligência artificial...";
 
       try {
-        // Usando o endpoint correto e atualizado do Gemini 1.5 Flash
+        // Esta é a URL exata para o Gemini 1.5 Flash
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MINHA_CHAVE_API}`;
         
         const response = await fetch(url, {
@@ -333,36 +85,21 @@
 
         const result = await response.json();
         
-        if (result.error) {
-            throw new Error(result.error.message);
+        if (!response.ok) {
+           // Isso captura erros específicos do servidor (como 404 ou 400)
+           throw new Error(result.error?.message || "Erro desconhecido");
         }
         
         const texto = result.candidates[0].content.parts[0].text;
         painel.innerHTML = marked.parse(texto);
         
-        statusDiv.innerText = "Material gerado com sucesso!";
-        statusDiv.className = "status ok";
-        
       } catch (err) {
-        painel.innerHTML = "Erro ao gerar conteúdo: " + err.message;
-        statusDiv.innerText = "Erro na conexão.";
-        statusDiv.className = "status erro";
+        painel.innerText = "Erro: " + err.message;
         console.error("Erro detalhado:", err);
       } finally {
         btnGerar.disabled = false;
         btnGerar.innerText = "Gerar Material com Gemini";
       }
-    }
-
-    function copiarResultado() {
-      const texto = document.getElementById("resultado").innerText;
-      if (!texto) return;
-      navigator.clipboard.writeText(texto);
-      alert("Texto copiado para a área de transferência!");
-    }
-
-    function limparTudo() { 
-      location.reload(); 
     }
   </script>
 </body>
