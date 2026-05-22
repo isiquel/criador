@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerador CPID de Materiais Bíblicos</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
   <script>
     // 🔴 ISIQUELE, COLE A SUA CHAVE DA API DO GEMINI ENTRE AS ASPAS ABAIXO:
-    const MINHA_CHAVE_API = "AIzaSyA6PxEkmKXTFcWvwwvq-tp5Swa55idozOE";
+    const MINHA_CHAVE_API = "AIzaSyCknZ9QzlIo4RpEjdUs5D3TdwF4A-02xCM";
   </script>
 
   <style>
@@ -121,17 +123,27 @@
     .btn-imprimir { background: #263238; color: white; }
     .btn-imprimir:hover { filter: brightness(1.15); }
 
+    /* Ajustado para formatar o texto do Markdown corretamente */
     #resultado {
       background: #fffdf8;
       border: 1px solid #eadcc2;
       border-left: 6px solid var(--dourado);
       border-radius: 10px;
       padding: 22px;
-      white-space: pre-wrap;
       line-height: 1.65;
       font-size: 16px;
       min-height: 500px;
+      color: #333;
     }
+
+    /* Estilos para deixar a resposta da IA bonita */
+    #resultado h1, #resultado h2, #resultado h3 {
+      color: var(--marrom);
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    #resultado p { margin-bottom: 1em; }
+    #resultado strong { color: var(--marrom-claro); }
 
     .status {
       margin-top: 10px;
@@ -267,7 +279,7 @@
 
     <section class="card resultado-area">
       <h2>Material Gerado</h2>
-      <div id="resultado">Preencha os campos ao lado e clique em “Gerar Material com Gemini”. O conteúdo aparecerá aqui.</div>
+      <div id="resultado">Preencha os campos ao lado e clique em “Gerar Material com Gemini”. O conteúdo aparecerá aqui de forma formatada.</div>
     </section>
   </main>
 
@@ -350,14 +362,14 @@
 
       if (!MINHA_CHAVE_API || MINHA_CHAVE_API === "COLE_SUA_CHAVE_AQUI_DENTRO") {
         mostrarStatus("Erro: Falta colar a chave API dentro do código!", "erro");
-        painelResultado.innerText = "Erro: Você esqueceu de colar a sua chave API do Gemini na linha 12 do código.";
+        painelResultado.innerHTML = "<p style='color:red;'><strong>Erro:</strong> Você esqueceu de colar a sua nova chave API do Gemini na linha 13 do código.</p>";
         return;
       }
 
       try {
         btnGerar.disabled = true;
         btnGerar.innerText = "Conectando ao Gemini... Aguarde...";
-        painelResultado.innerText = "O Gemini está produzindo o seu material teológico completo...\nIsso leva de 15 a 45 segundos devido ao tamanho do texto. Por favor, aguarde.";
+        painelResultado.innerHTML = "<p>O Gemini está produzindo o seu material teológico completo...<br><br>Isso leva de 15 a 45 segundos devido ao tamanho do texto. Por favor, aguarde.</p>";
         mostrarStatus("Enviando solicitação...", "ok");
 
         const promptCompleto = criarPromptTexto();
@@ -373,15 +385,15 @@
         });
 
         if (!resposta.ok) {
-          throw new Error("Falha na comunicação. Verifique se a sua Chave API está correta e sem espaços.");
+          throw new Error(`Erro na API (${resposta.status}). Verifique se a sua Chave API está correta e ativada.`);
         }
 
         const dados = await resposta.json();
         
-        // Verifica se o Gemini retornou o texto corretamente
         if (dados.candidates && dados.candidates[0].content && dados.candidates[0].content.parts) {
             const textoGerado = dados.candidates[0].content.parts[0].text;
-            painelResultado.innerText = textoGerado;
+            // APLICANDO A MELHORIA: Renderiza o texto do Gemini como HTML formatado
+            painelResultado.innerHTML = marked.parse(textoGerado);
             mostrarStatus("Material Bíblico gerado com sucesso!", "ok");
         } else {
             throw new Error("O Gemini respondeu, mas não enviou o texto esperado.");
@@ -389,7 +401,7 @@
 
       } catch (error) {
         console.error(error);
-        painelResultado.innerText = "Ocorreu um erro técnico ao gerar o conteúdo.\n\nDetalhes do erro: " + error.message;
+        painelResultado.innerHTML = `<p style="color:red;"><strong>Ocorreu um erro técnico ao gerar o conteúdo.</strong><br><br>Detalhes do erro: ${error.message}</p>`;
         mostrarStatus("Falha na execução.", "erro");
       } finally {
         btnGerar.disabled = false;
@@ -398,6 +410,7 @@
     }
 
     async function copiarResultado() {
+      // Usando innerText pegamos apenas o texto legível, sem os códigos HTML que o marked gerou
       const texto = document.getElementById("resultado").innerText;
       try {
         await navigator.clipboard.writeText(texto);
@@ -414,7 +427,7 @@
       document.getElementById("orientacoes").value = "";
       document.getElementById("licoes").value = "1";
       document.getElementById("perguntas").value = "5";
-      document.getElementById("resultado").innerText = "Preencha os campos ao lado e clique em “Gerar Material com Gemini”.";
+      document.getElementById("resultado").innerHTML = "Preencha os campos ao lado e clique em “Gerar Material com Gemini”. O conteúdo aparecerá aqui de forma formatada.";
       mostrarStatus("Campos limpos.", "ok");
     }
 
