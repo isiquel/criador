@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Gerador CPID de Materiais Bíblicos</title>
+
+  <!-- CONFIGURAÇÃO DA CHAVE AUTOMÁTICA -->
+  <script>
+    // 🔴 ISIQUELE, COLE A SUA CHAVE DA API DO GEMINI ENTRE AS ASPAS ABAIXO:
+    const MINHA_CHAVE_API = "AIzaSyAlWYVDBGWf_kH2Q2Kb9NRPepElYwsoSrs";
+  </script>
 
   <style>
     :root {
@@ -19,9 +24,7 @@
       --vermelho: #b3261e;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -38,17 +41,8 @@
       border-bottom: 5px solid var(--dourado);
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 30px;
-      letter-spacing: 0.5px;
-    }
-
-    header p {
-      margin: 10px 0 0;
-      font-size: 16px;
-      opacity: 0.95;
-    }
+    header h1 { margin: 0; font-size: 30px; letter-spacing: 0.5px; }
+    header p { margin: 10px 0 0; font-size: 16px; opacity: 0.95; }
 
     .container {
       max-width: 1200px;
@@ -82,9 +76,7 @@
       color: var(--marrom);
     }
 
-    input,
-    select,
-    textarea {
+    input, select, textarea {
       width: 100%;
       margin-top: 7px;
       padding: 12px;
@@ -95,14 +87,8 @@
       background: #fff;
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 90px;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
+    textarea { resize: vertical; min-height: 90px; }
+    input:focus, select:focus, textarea:focus {
       border-color: var(--dourado);
       box-shadow: 0 0 0 2px rgba(196, 151, 79, 0.18);
     }
@@ -125,54 +111,16 @@
       transition: 0.2s;
     }
 
-    .btn-principal {
-      background: var(--marrom);
-      color: white;
-    }
-
-    .btn-principal:hover {
-      background: var(--marrom-claro);
-    }
-
-    .btn-secundario {
-      background: var(--dourado);
-      color: white;
-    }
-
-    .btn-secundario:hover {
-      filter: brightness(0.92);
-    }
-
-    .btn-limpar {
-      background: #eee;
-      color: #333;
-    }
-
-    .btn-limpar:hover {
-      background: #ddd;
-    }
-
-    .btn-copiar {
-      background: var(--verde);
-      color: white;
-    }
-
-    .btn-copiar:hover {
-      filter: brightness(0.92);
-    }
-
-    .btn-imprimir {
-      background: #263238;
-      color: white;
-    }
-
-    .btn-imprimir:hover {
-      filter: brightness(1.15);
-    }
-
-    .resultado-area {
-      min-height: 600px;
-    }
+    .btn-principal { background: var(--marrom); color: white; }
+    .btn-principal:hover { background: var(--marrom-claro); }
+    .btn-secundario { background: var(--dourado); color: white; }
+    .btn-secundario:hover { filter: brightness(0.92); }
+    .btn-limpar { background: #eee; color: #333; }
+    .btn-limpar:hover { background: #ddd; }
+    .btn-copiar { background: var(--verde); color: white; }
+    .btn-copiar:hover { filter: brightness(0.92); }
+    .btn-imprimir { background: #263238; color: white; }
+    .btn-imprimir:hover { filter: brightness(1.15); }
 
     #resultado {
       background: #fffdf8;
@@ -186,17 +134,6 @@
       min-height: 500px;
     }
 
-    .aviso {
-      background: #e3f2fd;
-      color: #0d47a1;
-      border-left: 5px solid #1e88e5;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
     .status {
       margin-top: 10px;
       font-size: 14px;
@@ -205,16 +142,8 @@
       border-radius: 6px;
       text-align: center;
     }
-
-    .ok {
-      color: var(--verde);
-      background: #e8f5e9;
-    }
-
-    .erro {
-      color: var(--vermelho);
-      background: #ffebee;
-    }
+    .ok { color: var(--verde); background: #e8f5e9; }
+    .erro { color: var(--vermelho); background: #ffebee; }
 
     .botoes {
       display: grid;
@@ -222,85 +151,39 @@
       gap: 10px;
     }
 
-    footer {
-      text-align: center;
-      color: #6b5a4d;
-      padding: 20px;
-      font-size: 14px;
-    }
+    footer { text-align: center; color: #6b5a4d; padding: 20px; font-size: 14px; }
 
     @media (max-width: 900px) {
-      .container {
-        grid-template-columns: 1fr;
-      }
-
-      .linha {
-        grid-template-columns: 1fr;
-      }
-
-      .botoes {
-        grid-template-columns: 1fr;
-      }
+      .container { grid-template-columns: 1fr; }
+      .linha { grid-template-columns: 1fr; }
+      .botoes { grid-template-columns: 1fr; }
     }
 
     @media print {
-      body {
-        background: white;
-      }
-
-      header,
-      .painel,
-      footer,
-      .aviso,
-      .botoes {
-        display: none !important;
-      }
-
-      .container {
-        display: block;
-        margin: 0;
-        padding: 0;
-      }
-
-      .card {
-        box-shadow: none;
-        border: none;
-      }
-
-      #resultado {
-        border: none;
-        padding: 0;
-        font-size: 17px;
-      }
+      body { background: white; }
+      header, .painel, footer, .botoes { display: none !important; }
+      .container { display: block; margin: 0; padding: 0; }
+      .card { box-shadow: none; border: none; }
+      #resultado { border: none; padding: 0; font-size: 17px; }
     }
   </style>
 
-  <!-- Script universal para carregar o Gemini sem travar o navegador -->
-  <script type="importmap">
-    {
-      "imports": {
-        "@google/generative-ai": "https://esm.run/@google/generative-ai"
-      }
-    }
+  <!-- Carregamento Direto e Universal do Gemini SDK via WEB -->
+  <script type="module">
+    import { GoogleGenAI } from "https://esm.run/@google/generative-ai";
+    window.GoogleGenAI = GoogleGenAI;
   </script>
 </head>
 
 <body>
   <header>
     <h1>Gerador CPID de Materiais Bíblicos</h1>
-    <p>Crie revistas de EBD, lições, apostilas, sermões, estudos e materiais com Inteligência Artificial e Textos Originais</p>
+    <p>Crie lições, sermões, revistas de EBD e devocionais com Inteligência Artificial e Textos Originais</p>
   </header>
 
   <main class="container">
     <section class="card painel">
       <h2>Configurar Material</h2>
-
-      <div class="aviso">
-        <strong>Integração Ativa:</strong> Insira sua chave API do Gemini abaixo. Ela fica salva localmente de forma segura apenas no seu navegador.
-      </div>
-
-      <label for="apiKey">Chave API do Gemini</label>
-      <input id="apiKey" type="password" placeholder="Cole sua chave AIzaSy... aqui" onchange="salvarChave(this.value)" />
 
       <label for="tipo">Tipo de material</label>
       <select id="tipo">
@@ -319,7 +202,7 @@
         <option value="Almeida Revista e Corrigida (ARC)">Almeida Revista e Corrigida (ARC)</option>
         <option value="Nova Versão Internacional (NVI)">Nova Versão Internacional (NVI)</option>
         <option value="Nova Almeida Atualizada (NAA)">Nova Almeida Atualizada (NAA)</option>
-        <option value="Textos Originais (Hebraico/Grego) e análise do Léxico Strong">Textos Originais (Hebraico/Grego) + Léxico Strong</option>
+        <option value="Textos Originais (Hebraico/Grego) e análise profunda do Léxico Strong">Textos Originais (Hebraico/Grego) + Léxico Strong</option>
         <option value="Linguagem de Hoje (NTLH)">Nova Tradução na Linguagem de Hoje (NTLH)</option>
       </select>
 
@@ -339,7 +222,6 @@
             <option>Novos Convertidos</option>
             <option>Professores de EBD</option>
             <option>Liderança da Igreja</option>
-            <option>Obreiros</option>
           </select>
         </div>
 
@@ -350,7 +232,6 @@
             <option>Teológica e profunda</option>
             <option>Simples e objetiva</option>
             <option>Jovem e dinâmica</option>
-            <option>Expositiva e doutrinária</option>
           </select>
         </div>
       </div>
@@ -358,7 +239,7 @@
       <div class="linha">
         <div>
           <label for="licoes">Qtd. de Lições/Dias</label>
-          <input id="licoes" type="number" min="1" max="20" value="1" />
+          <input id="licoes" type="number" min="1" max="10" value="1" />
         </div>
 
         <div>
@@ -377,7 +258,7 @@
       <input id="editora" type="text" value="CPID - Casa Publicadora da Igreja de Deus" />
 
       <label for="orientacoes">Orientações adicionais para a IA</label>
-      <textarea id="orientacoes" placeholder="Ex: trazer citações históricas, focar na aplicação prática ou detalhar o contexto cultural da época."></textarea>
+      <textarea id="orientacoes" placeholder="Ex: trazer fatos históricos, focar na aplicação prática ou detalhar o contexto cultural da época."></textarea>
 
       <button class="btn-principal" id="btnGerar" onclick="gerarMaterialComGemini()">Gerar Material com Gemini</button>
 
@@ -386,7 +267,6 @@
         <button class="btn-imprimir" onclick="window.print()">Imprimir / PDF</button>
       </div>
 
-      <button class="btn-secundario" onclick="gerarPromptParaIA()">Ver Estrutura do Prompt</button>
       <button class="btn-limpar" onclick="limparTudo()">Limpar Tudo</button>
 
       <div id="status" class="status"></div>
@@ -394,31 +274,15 @@
 
     <section class="card resultado-area">
       <h2>Material Gerado</h2>
-      <div id="resultado">Preencha os campos ao lado, certifique-se de inserir a sua Chave API do Gemini e clique em “Gerar Material com Gemini”.</div>
+      <div id="resultado">Preencha os campos ao lado e clique em “Gerar Material com Gemini”. O conteúdo aparecerá aqui.</div>
     </section>
   </main>
 
   <footer>
-    Sistema inteligente para criação de materiais bíblicos, revistas de EBD, apostilas e estudos.
+    Sistema CPID Inteligente para criação de materiais bíblicos.
   </footer>
 
-  <!-- Código JavaScript simplificado e corrigido para evitar travamentos -->
-  <script type="module">
-    import { GoogleGenAI } from "@google/generative-ai";
-
-    // Executa assim que a página abre
-    window.addEventListener("DOMContentLoaded", () => {
-      const chaveSalva = localStorage.getItem("cpid_gemini_key");
-      if (chaveSalva) {
-        document.getElementById("apiKey").value = chaveSalva;
-      }
-    });
-
-    window.salvarChave = function(chave) {
-      localStorage.setItem("cpid_gemini_key", chave.trim());
-      mostrarStatus("Chave API salva localmente!", "ok");
-    }
-
+  <script>
     function pegarValor(id) {
       return document.getElementById(id).value.trim();
     }
@@ -437,7 +301,7 @@
       return nomes[tipo] || "Material Bíblico";
     }
 
-    window.gerarPromptParaIA = function() {
+    function criarPromptTexto() {
       const tipo = nomeTipo(pegarValor("tipo"));
       const traducao = pegarValor("traducao");
       const titulo = pegarValor("titulo") || "Material Bíblico";
@@ -467,9 +331,9 @@
 
       prompt += `INSTRUÇÕES OBRIGATÓRIAS DE CONTEÚDO:\n`;
       prompt += `1. Se a tradução selecionada for 'Textos Originais', extraia os termos originais em Hebraico (para o Antigo Testamento) ou Grego (para o Novo Testamento), exiba as palavras transliteradas e faça a correlação com os significados teológicos baseados no Léxico Strong.\n`;
-      prompt += `2. Forneça conteúdo completo e extenso para cada uma das ${licoes} lições/capítulos solicitados. Não resuma e não use placeholders.\n`;
-      prompt += `3. Estruture rigidamente o texto usando a seguinte ordem clara:\n`;
-      prompt += `   - Capa Textual (Título, Autor, Ministério, Data)\n`;
+      prompt += `2. Forneça conteúdo completo e extenso para cada uma das lições/capítulos solicitados. Não resuma de forma alguma.\n`;
+      prompt += `3. Estruture o texto usando a seguinte ordem clara:\n`;
+      prompt += `   - Capa Textual (Título, Autor, Ministério)\n`;
       prompt += `   - Apresentação e Objetivo Geral do Material\n`;
       prompt += `   - Sumário das Lições\n`;
       prompt += `   - Para cada Lição:\n`;
@@ -482,35 +346,34 @@
       prompt += `     * APLICAÇÃO DIÁRIA E PASTORAL\n`;
       prompt += `     * SINOPSE DA LIÇÃO\n`;
       prompt += `     * CONCLUSÃO\n`;
-      prompt += `     * REVISANDO O CONTEÚDO (Exatamente as ${perguntas} perguntas com respostas).\n\n`;
-
-      document.getElementById("resultado").innerText = prompt;
-      mostrarStatus("Visualização do prompt gerada.", "ok");
+      prompt += `     * REVISANDO O CONTEÚDO (Exatamente as ${perguntas} perguntas estruturadas com respostas detalhadas inclusas).\n\n`;
+      
       return prompt;
     }
 
-    window.gerarMaterialComGemini = async function() {
-      const apiKey = pegarValor("apiKey");
+    async function gerarMaterialComGemini() {
       const btnGerar = document.getElementById("btnGerar");
       const painelResultado = document.getElementById("resultado");
 
-      if (!apiKey) {
-        mostrarStatus("Erro: Insira sua Chave API do Gemini!", "erro");
-        document.getElementById("apiKey").focus();
+      if (!MINHA_CHAVE_API || MINHA_CHAVE_API === "COLE_SUA_CHAVE_AQUI_DENTRO") {
+        mostrarStatus("Erro: Você esqueceu de colar a sua chave API dentro do código do arquivo!", "erro");
         return;
       }
 
       try {
         btnGerar.disabled = true;
-        btnGerar.innerText = "Gerando... Por favor, aguarde...";
-        painelResultado.innerText = "O Gemini está produzindo o seu material teológico...\nIsso leva de 15 a 40 segundos pois o texto gerado é longo e detalhado. Não feche a página.";
-        mostrarStatus("Conectando ao servidor da IA...", "ok");
+        btnGerar.innerText = "Conectando ao Gemini... Aguarde...";
+        painelResultado.innerText = "O Gemini está produzindo o seu material teológico completo...\nIsso leva de 15 a 45 segundos por ser um texto longo. Por favor, aguarde e não feche o app.";
+        mostrarStatus("Enviando solicitação para a IA...", "ok");
 
-        // Instancia a API usando a biblioteca oficial
-        const ai = new GoogleGenAI({ apiKey: apiKey });
+        if (!window.GoogleGenAI) {
+          throw new Error("A biblioteca de conexão do Google ainda está carregando. Aguarde 3 segundos e tente novamente.");
+        }
+
+        const ai = new window.GoogleGenAI({ apiKey: MINHA_CHAVE_API });
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        const promptCompleto = window.gerarPromptParaIA();
+        const promptCompleto = criarPromptTexto();
         const resultadoIA = await model.generateContent(promptCompleto);
         const textoGerado = resultadoIA.response.text();
 
@@ -519,47 +382,43 @@
 
       } catch (error) {
         console.error(error);
-        painelResultado.innerText = "Erro ao gerar conteúdo.\n\nVerifique se sua chave está correta ou se o seu plano gratuito possui limite de requisições por minuto.\n\nDetalhes: " + error.message;
-        mostrarStatus("Falha na API.", "erro");
+        painelResultado.innerText = "Ocorreu um erro técnico ao gerar o conteúdo.\n\nMotivos comuns:\n1. A chave colada dentro do código está incorreta ou desativada.\n2. O navegador barrou o carregamento da biblioteca externa.\n\nDetalhes do erro: " + error.message;
+        mostrarStatus("Falha na execução.", "erro");
       } finally {
         btnGerar.disabled = false;
         btnGerar.innerText = "Gerar Material com Gemini";
       }
     }
 
-    window.copiarResultado = async function() {
+    async function copiarResultado() {
       const texto = document.getElementById("resultado").innerText;
       try {
         await navigator.clipboard.writeText(texto);
-        mostrarStatus("Texto copiado!", "ok");
+        mostrarStatus("Texto copiado com sucesso!", "ok");
       } catch (erro) {
         mostrarStatus("Selecione o texto manualmente para copiar.", "erro");
       }
     }
 
-    window.limparTudo = function() {
+    function limparTudo() {
       document.getElementById("titulo").value = "";
       document.getElementById("tema").value = "";
       document.getElementById("textoBase").value = "";
-      document.getElementById("comentarista").value = "";
       document.getElementById("orientacoes").value = "";
       document.getElementById("licoes").value = "1";
       document.getElementById("perguntas").value = "5";
-      document.getElementById("resultado").innerText = "Preencha os campos ao lado, insira a Chave API e clique em “Gerar Material com Gemini”.";
-      mostrarStatus("Formulário redefinido.", "ok");
+      document.getElementById("resultado").innerText = "Preencha os campos ao lado e clique em “Gerar Material com Gemini”.";
+      mostrarStatus("Campos limpos.", "ok");
     }
 
     function mostrarStatus(mensagem, tipo) {
       const status = document.getElementById("status");
       status.innerText = mensagem;
       status.className = "status " + tipo;
-      
-      if(tipo === "ok") {
-        setTimeout(() => {
-          status.innerText = "";
-          status.className = "status";
-        }, 4000);
-      }
+      setTimeout(() => {
+        status.innerText = "";
+        status.className = "status";
+      }, 5000);
     }
   </script>
 </body>
