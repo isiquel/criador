@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Gerador CPID de Materiais Bíblicos</title>
+
+  <style>
+    :root {
+      --marrom: #4b2e1e;
+      --marrom-claro: #7a4a30;
+      --bege: #f4efe6;
+      --dourado: #c4974f;
+      --branco: #ffffff;
+      --cinza: #444;
+      --borda: #ddd;
+      --verde: #2e7d32;
+      --vermelho: #b3261e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bege);
+      color: #222;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--marrom), var(--marrom-claro));
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+      border-bottom: 5px solid var(--dourado);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      margin: 10px 0 0;
+      font-size: 16px;
+      opacity: 0.95;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 18px;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--branco);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.10);
+      border: 1px solid #eee;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: var(--marrom);
+      font-size: 22px;
+      border-bottom: 2px solid var(--dourado);
+      padding-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: var(--marrom);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      margin-top: 7px;
+      padding: 12px;
+      border: 1px solid var(--borda);
+      border-radius: 9px;
+      font-size: 15px;
+      outline: none;
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--dourado);
+      box-shadow: 0 0 0 2px rgba(196, 151, 79, 0.18);
+    }
+
+    .linha {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      padding: 13px;
+      border-radius: 9px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: 0.2s;
+    }
+
+    .btn-principal {
+      background: var(--marrom);
+      color: white;
+    }
+
+    .btn-principal:hover {
+      background: var(--marrom-claro);
+    }
+
+    .btn-secundario {
+      background: var(--dourado);
+      color: white;
+    }
+
+    .btn-secundario:hover {
+      filter: brightness(0.92);
+    }
+
+    .btn-limpar {
+      background: #eee;
+      color: #333;
+    }
+
+    .btn-limpar:hover {
+      background: #ddd;
+    }
+
+    .btn-copiar {
+      background: var(--verde);
+      color: white;
+    }
+
+    .btn-copiar:hover {
+      filter: brightness(0.92);
+    }
+
+    .btn-imprimir {
+      background: #263238;
+      color: white;
+    }
+
+    .btn-imprimir:hover {
+      filter: brightness(1.15);
+    }
+
+    .resultado-area {
+      min-height: 600px;
+    }
+
+    #resultado {
+      background: #fffdf8;
+      border: 1px solid #eadcc2;
+      border-left: 6px solid var(--dourado);
+      border-radius: 10px;
+      padding: 22px;
+      white-space: pre-wrap;
+      line-height: 1.65;
+      font-size: 16px;
+      min-height: 500px;
+    }
+
+    .aviso {
+      background: #fff8e1;
+      color: #5d4300;
+      border-left: 5px solid #f6b800;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .ok {
+      color: var(--verde);
+    }
+
+    .erro {
+      color: var(--vermelho);
+    }
+
+    .botoes {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    footer {
+      text-align: center;
+      color: #6b5a4d;
+      padding: 20px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      .linha {
+        grid-template-columns: 1fr;
+      }
+
+      .botoes {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      header,
+      .painel,
+      footer,
+      .aviso,
+      .botoes {
+        display: none !important;
+      }
+
+      .container {
+        display: block;
+        margin: 0;
+        padding: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border: none;
+      }
+
+      #resultado {
+        border: none;
+        padding: 0;
+        font-size: 17px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Gerador CPID de Materiais Bíblicos</h1>
+    <p>Crie revistas de EBD, lições, apostilas, sermões, estudos e materiais para professores</p>
+  </header>
+
+  <main class="container">
+    <section class="card painel">
+      <h2>Configurar Material</h2>
+
+      <div class="aviso">
+        Este modelo funciona direto no HTML. Ele gera uma estrutura pronta. Para usar IA real, conecte depois a um backend seguro com a API da OpenAI.
+      </div>
+
+      <label for="tipo">Tipo de material</label>
+      <select id="tipo">
+        <option value="revista_ebd">Revista de EBD</option>
+        <option value="licao_professor">Lição para Professor</option>
+        <option value="licao_aluno">Lição para Aluno</option>
+        <option value="apostila">Apostila Teológica</option>
+        <option value="sermao">Sermão</option>
+        <option value="estudo_biblico">Estudo Bíblico</option>
+        <option value="livro">Livro Cristão</option>
+        <option value="devocional">Devocional</option>
+      </select>
+
+      <label for="titulo">Título do material</label>
+      <input id="titulo" type="text" placeholder="Ex: Em Defesa da Fé Cristã" />
+
+      <label for="tema">Tema principal</label>
+      <input id="tema" type="text" placeholder="Ex: Apologética cristã para jovens" />
+
+      <div class="linha">
+        <div>
+          <label for="publico">Público-alvo</label>
+          <select id="publico">
+            <option>Jovens</option>
+            <option>Adolescentes</option>
+            <option>Adultos</option>
+            <option>Novos Convertidos</option>
+            <option>Professores de EBD</option>
+            <option>Liderança da Igreja</option>
+            <option>Obreiros</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="tom">Linguagem</label>
+          <select id="tom">
+            <option>Pastoral, bíblica e didática</option>
+            <option>Teológica e profunda</option>
+            <option>Simples e objetiva</option>
+            <option>Jovem e dinâmica</option>
+            <option>Expositiva e doutrinária</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="linha">
+        <div>
+          <label for="licoes">Quantidade de lições/capítulos</label>
+          <input id="licoes" type="number" min="1" max="20" value="1" />
+        </div>
+
+        <div>
+          <label for="perguntas">Perguntas por lição</label>
+          <input id="perguntas" type="number" min="1" max="10" value="5" />
+        </div>
+      </div>
+
+      <label for="textoBase">Texto bíblico base</label>
+      <input id="textoBase" type="text" placeholder="Ex: 1 Pedro 3.15; Judas 3; 2 Timóteo 4.2" />
+
+      <label for="comentarista">Comentarista / Autor</label>
+      <input id="comentarista" type="text" placeholder="Ex: Pr. Isiquel Rodrigues" />
+
+      <label for="editora">Editora / Ministério</label>
+      <input id="editora" type="text" value="CPID - Casa Publicadora da Igreja de Deus" />
+
+      <label for="orientacoes">Orientações adicionais</label>
+      <textarea id="orientacoes" placeholder="Ex: seguir modelo de revista do professor, com sinopse, conclusão, perguntas respondidas e revisão do conteúdo."></textarea>
+
+      <button class="btn-principal" onclick="gerarMaterial()">Gerar Material</button>
+
+      <div class="botoes">
+        <button class="btn-copiar" onclick="copiarResultado()">Copiar Texto</button>
+        <button class="btn-imprimir" onclick="window.print()">Imprimir / Salvar PDF</button>
+      </div>
+
+      <button class="btn-secundario" onclick="gerarPromptParaIA()">Gerar Prompt para ChatGPT</button>
+      <button class="btn-limpar" onclick="limparTudo()">Limpar Tudo</button>
+
+      <div id="status" class="status"></div>
+    </section>
+
+    <section class="card resultado-area">
+      <h2>Material Gerado</h2>
+      <div id="resultado">Preencha os campos ao lado e clique em “Gerar Material”.</div>
+    </section>
+  </main>
+
+  <footer>
+    Sistema modelo para criação de materiais bíblicos, revistas de EBD, apostilas e estudos.
+  </footer>
+
+  <script>
+    function pegarValor(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function dataAtualFormatada() {
+      const data = new Date();
+      return data.toLocaleDateString("pt-BR");
+    }
+
+    function gerarMaterial() {
+      const tipo = pegarValor("tipo");
+      const titulo = pegarValor("titulo") || "Material Bíblico";
+      const tema = pegarValor("tema") || "Tema a definir";
+      const publico = pegarValor("publico");
+      const tom = pegarValor("tom");
+      const licoes = parseInt(pegarValor("licoes")) || 1;
+      const perguntas = parseInt(pegarValor("perguntas")) || 5;
+      const textoBase = pegarValor("textoBase") || "Texto bíblico a definir";
+      const comentarista = pegarValor("comentarista") || "Comentarista a definir";
+      const editora = pegarValor("editora") || "Editora / Ministério";
+      const orientacoes = pegarValor("orientacoes") || "Sem orientações adicionais.";
+
+      let conteudo = "";
+
+      conteudo += "========================================\n";
+      conteudo += titulo.toUpperCase() + "\n";
+      conteudo += "========================================\n\n";
+      conteudo += "Tipo de Material: " + nomeTipo(tipo) + "\n";
+      conteudo += "Tema: " + tema + "\n";
+      conteudo += "Público-alvo: " + publico + "\n";
+      conteudo += "Linguagem: " + tom + "\n";
+      conteudo += "Texto Bíblico Base: " + textoBase + "\n";
+      conteudo += "Comentarista: " + comentarista + "\n";
+      conteudo += "Editora / Ministério: " + editora + "\n";
+      conteudo += "Data de criação: " + dataAtualFormatada() + "\n\n";
+
+      conteudo += "APRESENTAÇÃO\n";
+      conteudo += "Este material foi estruturado para auxiliar professores, alunos e líderes no estudo da Palavra de Deus. ";
+      conteudo += "Seu objetivo é apresentar o tema de forma bíblica, organizada, pastoral e aplicável à vida cristã.\n\n";
+
+      conteudo += "OBJETIVO GERAL\n";
+      conteudo += "Conduzir o aluno à compreensão bíblica do tema \"" + tema + "\", fortalecendo sua fé, sua doutrina e sua prática cristã.\n\n";
+
+      conteudo += "ORIENTAÇÕES DO MATERIAL\n";
+      conteudo += orientacoes + "\n\n";
+
+      if (
+        tipo === "revista_ebd" ||
+        tipo === "licao_professor" ||
+        tipo === "licao_aluno"
+      ) {
+        conteudo += gerarRevistaEBD(licoes, perguntas, tema, textoBase);
+      } else if (tipo === "sermao") {
+        conteudo += gerarSermao(tema, textoBase);
+      } else if (tipo === "apostila") {
+        conteudo += gerarApostila(licoes, perguntas, tema, textoBase);
+      } else if (tipo === "estudo_biblico") {
+        conteudo += gerarEstudoBiblico(perguntas, tema, textoBase);
+      } else if (tipo === "livro") {
+        conteudo += gerarLivro(licoes, tema, textoBase);
+      } else if (tipo === "devocional") {
+        conteudo += gerarDevocional(licoes, tema, textoBase);
+      }
+
+      document.getElementById("resultado").innerText = conteudo;
+      mostrarStatus("Material gerado com sucesso.", "ok");
+    }
+
+    function nomeTipo(tipo) {
+      const nomes = {
+        revista_ebd: "Revista de EBD",
+        licao_professor: "Lição para Professor",
+        licao_aluno: "Lição para Aluno",
+        apostila: "Apostila Teológica",
+        sermao: "Sermão",
+        estudo_biblico: "Estudo Bíblico",
+        livro: "Livro Cristão",
+        devocional: "Devocional"
+      };
+
+      return nomes[tipo] || "Material Bíblico";
+    }
+
+    function gerarRevistaEBD(licoes, perguntas, tema, textoBase) {
+      let texto = "";
+
+      texto += "SUMÁRIO\n";
+      for (let i = 1; i <= licoes; i++) {
+        texto += "Lição " + i + " - " + tema + "\n";
+      }
+
+      texto += "\n";
+
+      for (let i = 1; i <= licoes; i++) {
+        texto += "----------------------------------------\n";
+        texto += "LIÇÃO " + i + "\n";
+        texto += "----------------------------------------\n\n";
+
+        texto += "TÍTULO DA LIÇÃO\n";
+        texto += tema + "\n\n";
+
+        texto += "TEXTO ÁUREO\n";
+        texto += "\"" + textoBase + "\"\n\n";
+
+        texto += "VERDADE PRÁTICA\n";
+        texto += "A fé cristã precisa ser conhecida, defendida e vivida com firmeza, amor e fidelidade às Escrituras.\n\n";
+
+        texto += "LEITURA BÍBLICA EM CLASSE\n";
+        texto += textoBase + "\n\n";
+
+        texto += "OBJETIVOS DA LIÇÃO\n";
+        texto += "1. Compreender o ensino bíblico central sobre o tema.\n";
+        texto += "2. Identificar os desafios doutrinários e práticos relacionados ao assunto.\n";
+        texto += "3. Aplicar o conteúdo estudado à vida cristã, à igreja e à missão.\n\n";
+
+        texto += "INTRODUÇÃO\n";
+        texto += "A presente lição tem como objetivo conduzir o aluno a uma compreensão clara e bíblica sobre \"" + tema + "\". ";
+        texto += "Vivemos dias em que a fé precisa ser ensinada com profundidade, defendida com equilíbrio e praticada com temor diante de Deus. ";
+        texto += "Por isso, este estudo busca fortalecer a convicção cristã e preparar o povo de Deus para responder aos desafios do nosso tempo.\n\n";
+
+        texto += "I - A IMPORTÂNCIA BÍBLICA DO TEMA\n";
+        texto += "O primeiro passo para compreender este assunto é reconhecer que toda doutrina cristã deve nascer das Escrituras. ";
+        texto += "A Bíblia não é apenas uma fonte de inspiração, mas a regra de fé e prática da Igreja. ";
+        texto += "Quando o crente conhece a Palavra, ele se torna mais firme, mais maduro e mais preparado para servir ao Senhor.\n\n";
+
+        texto += "Aplicação:\n";
+        texto += "O professor deve mostrar aos alunos que o conhecimento bíblico não é apenas informação, mas formação espiritual. ";
+        texto += "A verdade aprendida precisa gerar transformação no caráter, na fé e na conduta cristã.\n\n";
+
+        texto += "II - OS DESAFIOS ENFRENTADOS PELA IGREJA\n";
+        texto += "A Igreja sempre enfrentou oposição, distorções doutrinárias e pressões culturais. ";
+        texto += "Desde os tempos bíblicos, o povo de Deus foi chamado a permanecer fiel mesmo diante de vozes contrárias à verdade. ";
+        texto += "Hoje não é diferente. O cristão precisa discernir o erro, rejeitar falsos ensinos e permanecer firme na sã doutrina.\n\n";
+
+        texto += "Aplicação:\n";
+        texto += "O aluno deve ser conduzido a refletir sobre sua responsabilidade pessoal na defesa da fé. ";
+        texto += "Não basta frequentar a igreja; é necessário conhecer aquilo em que se crê.\n\n";
+
+        texto += "III - A RESPOSTA CRISTÃ DIANTE DO MUNDO\n";
+        texto += "A resposta cristã deve unir verdade e amor. Defender a fé não significa agir com arrogância, mas apresentar a verdade com mansidão, reverência e firmeza. ";
+        texto += "O testemunho cristão precisa ser coerente com a mensagem anunciada.\n\n";
+
+        texto += "Aplicação:\n";
+        texto += "O professor pode incentivar os alunos a responderem aos questionamentos da sociedade com base bíblica, oração, equilíbrio e vida exemplar.\n\n";
+
+        texto += "SINOPSE DA LIÇÃO\n";
+        texto += "Esta lição apresentou a relevância bíblica do tema, os desafios enfrentados pela Igreja e a necessidade de uma resposta cristã firme, amorosa e fundamentada nas Escrituras.\n\n";
+
+        texto += "CONCLUSÃO\n";
+        texto += "O estudo de \"" + tema + "\" nos lembra que a fé cristã precisa ser ensinada, preservada e vivida. ";
+        texto += "O crente que conhece a Palavra está melhor preparado para servir a Deus, edificar a igreja e testemunhar ao mundo.\n\n";
+
+        texto += "REVISANDO O CONTEÚDO\n";
+        for (let p = 1; p <= perguntas; p++) {
+          texto += p + ". Pergunta " + p + ": Qual ensinamento principal esta lição apresenta?\n";
+          texto += "Resposta: A lição ensina que o cristão deve conhecer a Palavra de Deus, permanecer firme na fé e aplicar a verdade bíblica em sua vida diária.\n\n";
+        }
+
+        texto += "ANOTAÇÕES DO PROFESSOR\n";
+        texto += "Use este espaço para acrescentar exemplos, experiências, referências bíblicas complementares e aplicações para a realidade da classe.\n\n";
+      }
+
+      return texto;
+    }
+
+    function gerarSermao(tema, textoBase) {
+      let texto = "";
+
+      texto += "SERMÃO\n\n";
+      texto += "Tema: " + tema + "\n";
+      texto += "Texto Base: " + textoBase + "\n\n";
+
+      texto += "TÍTULO\n";
+      texto += tema + "\n\n";
+
+      texto += "INTRODUÇÃO\n";
+      texto += "A mensagem de hoje nos conduz a refletir profundamente sobre \"" + tema + "\". ";
+      texto += "Deus deseja falar ao coração da Igreja e despertar em nós uma fé viva, obediente e comprometida com a sua vontade.\n\n";
+
+      texto += "PROPOSIÇÃO\n";
+      texto += "Mostrar que a Palavra de Deus oferece direção, correção e fortalecimento para todos aqueles que desejam viver segundo a vontade do Senhor.\n\n";
+
+      texto += "I - DEUS REVELA A SUA VONTADE PELA PALAVRA\n";
+      texto += "A Escritura é a voz de Deus orientando seu povo. Quando o homem se afasta da Palavra, perde direção; quando se aproxima dela, encontra luz para caminhar.\n\n";
+
+      texto += "II - A FÉ PRECISA SER PRATICADA\n";
+      texto += "Não basta ouvir a verdade; é necessário obedecê-la. A verdadeira fé produz frutos, posicionamento e compromisso com Deus.\n\n";
+
+      texto += "III - A IGREJA DEVE RESPONDER COM FIDELIDADE\n";
+      texto += "Em tempos difíceis, Deus chama sua Igreja a permanecer firme, rejeitar o pecado e proclamar a verdade com coragem.\n\n";
+
+      texto += "CONCLUSÃO\n";
+      texto += "O Senhor nos chama hoje a uma vida mais comprometida com sua Palavra. Que cada coração responda com fé, obediência e entrega total.\n\n";
+
+      texto += "APELO\n";
+      texto += "Se Deus falou com você, renda-se à sua vontade. Volte ao centro da Palavra, renove sua fé e coloque sua vida diante do altar do Senhor.\n\n";
+
+      return texto;
+    }
+
+    function gerarApostila(licoes, perguntas, tema, textoBase) {
+      let texto = "";
+
+      texto += "APOSTILA TEOLÓGICA\n\n";
+      texto += "Tema: " + tema + "\n";
+      texto += "Texto Base: " + textoBase + "\n\n";
+
+      texto += "EMENTA\n";
+      texto += "Esta apostila apresenta uma abordagem bíblica, teológica e prática sobre o tema proposto, com o objetivo de fortalecer o conhecimento cristão e auxiliar no ensino da igreja.\n\n";
+
+      texto += "OBJETIVOS DA APOSTILA\n";
+      texto += "1. Apresentar os fundamentos bíblicos do tema.\n";
+      texto += "2. Explicar os principais conceitos teológicos envolvidos.\n";
+      texto += "3. Aplicar o conteúdo à vida cristã e ao ministério.\n\n";
+
+      for (let i = 1; i <= licoes; i++) {
+        texto += "CAPÍTULO " + i + " - " + tema + "\n\n";
+        texto += "1. Fundamentação Bíblica\n";
+        texto += "A base de todo ensino cristão deve estar firmada nas Escrituras. O estudo deste tema precisa considerar o contexto bíblico, a doutrina e a aplicação prática.\n\n";
+
+        texto += "2. Desenvolvimento Teológico\n";
+        texto += "O tema deve ser compreendido à luz da revelação bíblica, da tradição cristã fiel às Escrituras e da necessidade pastoral da Igreja.\n\n";
+
+        texto += "3. Aplicação Ministerial\n";
+        texto += "O conhecimento adquirido deve servir para edificação da Igreja, formação de líderes e amadurecimento espiritual dos alunos.\n\n";
+
+        texto += "Questionário do Capítulo\n";
+        for (let p = 1; p <= perguntas; p++) {
+          texto += p + ". Explique a importância deste tema para a vida cristã.\n";
+        }
+
+        texto += "\n";
+      }
+
+      texto += "CONCLUSÃO GERAL\n";
+      texto += "O estudo realizado fortalece a compreensão bíblica e prepara o aluno para viver e ensinar a verdade com responsabilidade.\n\n";
+
+      return texto;
+    }
+
+    function gerarEstudoBiblico(perguntas, tema, textoBase) {
+      let texto = "";
+
+      texto += "ESTUDO BÍBLICO\n\n";
+      texto += "Tema: " + tema + "\n";
+      texto += "Texto Base: " + textoBase + "\n\n";
+
+      texto += "INTRODUÇÃO\n";
+      texto += "Este estudo busca apresentar de forma clara o ensino bíblico sobre \"" + tema + "\", conduzindo o participante à reflexão, compreensão e prática da Palavra de Deus.\n\n";
+
+      texto += "1. O QUE A BÍBLIA ENSINA SOBRE O TEMA\n";
+      texto += "A Palavra de Deus é a base segura para compreendermos qualquer assunto espiritual. Ela revela a vontade do Senhor e orienta o caminho do seu povo.\n\n";
+
+      texto += "2. POR QUE ESSE TEMA É IMPORTANTE\n";
+      texto += "O tema é importante porque toca diretamente a fé, a conduta e a missão da Igreja no mundo. O cristão precisa compreender a verdade para viver de modo fiel.\n\n";
+
+      texto += "3. COMO APLICAR NA VIDA CRISTÃ\n";
+      texto += "A aplicação acontece quando o ensino deixa de ser apenas conhecimento e passa a moldar atitudes, escolhas, palavras e relacionamentos.\n\n";
+
+      texto += "PERGUNTAS PARA DISCUSSÃO\n";
+      for (let p = 1; p <= perguntas; p++) {
+        texto += p + ". Como este ensino pode transformar nossa vida diária?\n";
+      }
+
+      texto += "\nCONCLUSÃO\n";
+      texto += "Que este estudo desperte maior amor pela Palavra e maior compromisso com a vontade de Deus.\n\n";
+
+      return texto;
+    }
+
+    function gerarLivro(capitulos, tema, textoBase) {
+      let texto = "";
+
+      texto += "LIVRO CRISTÃO\n\n";
+      texto += "Tema: " + tema + "\n";
+      texto += "Texto Base: " + textoBase + "\n\n";
+
+      texto += "PREFÁCIO\n";
+      texto += "Este livro foi idealizado para conduzir o leitor a uma jornada de reflexão bíblica, amadurecimento espiritual e compromisso com Deus.\n\n";
+
+      texto += "INTRODUÇÃO GERAL\n";
+      texto += "O tema \"" + tema + "\" é relevante para a vida cristã, para a igreja e para o cumprimento da missão que Deus confiou ao seu povo.\n\n";
+
+      texto += "SUMÁRIO\n";
+      for (let i = 1; i <= capitulos; i++) {
+        texto += "Capítulo " + i + " - " + tema + "\n";
+      }
+
+      texto += "\n";
+
+      for (let i = 1; i <= capitulos; i++) {
+        texto += "CAPÍTULO " + i + "\n";
+        texto += tema + "\n\n";
+        texto += "Neste capítulo, refletiremos sobre aspectos essenciais do tema, observando sua base bíblica, sua importância doutrinária e sua aplicação prática.\n\n";
+
+        texto += "1. Fundamento Bíblico\n";
+        texto += "Toda verdade espiritual precisa estar alicerçada na Palavra de Deus. A Escritura ilumina o entendimento e conduz o crente à maturidade.\n\n";
+
+        texto += "2. Reflexão Teológica\n";
+        texto += "A teologia saudável não afasta o cristão de Deus; pelo contrário, aproxima-o da verdade, fortalece sua fé e aprofunda sua adoração.\n\n";
+
+        texto += "3. Aplicação Prática\n";
+        texto += "O ensino bíblico precisa alcançar a vida diária, influenciando decisões, relacionamentos, ministério e testemunho.\n\n";
+      }
+
+      texto += "CONSIDERAÇÕES FINAIS\n";
+      texto += "Que este conteúdo edifique vidas, fortaleça a Igreja e glorifique o nome do Senhor.\n\n";
+
+      return texto;
+    }
+
+    function gerarDevocional(dias, tema, textoBase) {
+      let texto = "";
+
+      texto += "DEVOCIONAL\n\n";
+      texto += "Tema: " + tema + "\n";
+      texto += "Texto Base: " + textoBase + "\n\n";
+
+      for (let i = 1; i <= dias; i++) {
+        texto += "DIA " + i + "\n";
+        texto += "Título: Caminhando com Deus em " + tema + "\n\n";
+
+        texto += "Versículo Base:\n";
+        texto += textoBase + "\n\n";
+
+        texto += "Meditação:\n";
+        texto += "Deus nos chama a viver uma fé sincera, firme e obediente. O tema de hoje nos conduz a examinar o coração e alinhar nossa vida com a vontade do Senhor.\n\n";
+
+        texto += "Aplicação:\n";
+        texto += "Separe um momento para orar, refletir e praticar aquilo que Deus está ensinando por meio da sua Palavra.\n\n";
+
+        texto += "Oração:\n";
+        texto += "Senhor, guia minha vida pela tua Palavra. Fortalece minha fé e ajuda-me a viver de modo agradável a ti. Amém.\n\n";
+      }
+
+      return texto;
+    }
+
+    function gerarPromptParaIA() {
+      const tipo = nomeTipo(pegarValor("tipo"));
+      const titulo = pegarValor("titulo") || "Material Bíblico";
+      const tema = pegarValor("tema") || "Tema a definir";
+      const publico = pegarValor("publico");
+      const tom = pegarValor("tom");
+      const licoes = pegarValor("licoes") || "1";
+      const perguntas = pegarValor("perguntas") || "5";
+      const textoBase = pegarValor("textoBase") || "Texto bíblico a definir";
+      const comentarista = pegarValor("comentarista") || "Comentarista a definir";
+      const editora = pegarValor("editora") || "Editora / Ministério";
+      const orientacoes = pegarValor("orientacoes") || "Sem orientações adicionais.";
+
+      let prompt = "";
+
+      prompt += "Crie um material bíblico completo seguindo as informações abaixo:\n\n";
+      prompt += "Tipo de material: " + tipo + "\n";
+      prompt += "Título: " + titulo + "\n";
+      prompt += "Tema: " + tema + "\n";
+      prompt += "Público-alvo: " + publico + "\n";
+      prompt += "Linguagem: " + tom + "\n";
+      prompt += "Quantidade de lições ou capítulos: " + licoes + "\n";
+      prompt += "Perguntas por lição: " + perguntas + "\n";
+      prompt += "Texto bíblico base: " + textoBase + "\n";
+      prompt += "Comentarista: " + comentarista + "\n";
+      prompt += "Editora / Ministério: " + editora + "\n";
+      prompt += "Orientações adicionais: " + orientacoes + "\n\n";
+
+      prompt += "Estruture o material com:\n";
+      prompt += "- Capa textual\n";
+      prompt += "- Apresentação\n";
+      prompt += "- Sumário\n";
+      prompt += "- Texto áureo\n";
+      prompt += "- Verdade prática\n";
+      prompt += "- Leitura bíblica\n";
+      prompt += "- Objetivos da lição\n";
+      prompt += "- Introdução\n";
+      prompt += "- Desenvolvimento com tópicos e subtópicos\n";
+      prompt += "- Aplicações para a vida cristã\n";
+      prompt += "- Sinopse da lição\n";
+      prompt += "- Conclusão\n";
+      prompt += "- Revisando o conteúdo\n";
+      prompt += "- Perguntas com respostas para a revista do professor\n\n";
+
+      prompt += "Use linguagem bíblica, pastoral, doutrinária, organizada e apropriada para Escola Bíblica Dominical.";
+
+      document.getElementById("resultado").innerText = prompt;
+      mostrarStatus("Prompt para IA gerado com sucesso.", "ok");
+    }
+
+    async function copiarResultado() {
+      const texto = document.getElementById("resultado").innerText;
+
+      try {
+        await navigator.clipboard.writeText(texto);
+        mostrarStatus("Texto copiado com sucesso.", "ok");
+      } catch (erro) {
+        mostrarStatus("Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.", "erro");
+      }
+    }
+
+    function limparTudo() {
+      document.getElementById("titulo").value = "";
+      document.getElementById("tema").value = "";
+      document.getElementById("textoBase").value = "";
+      document.getElementById("comentarista").value = "";
+      document.getElementById("orientacoes").value = "";
+      document.getElementById("licoes").value = "1";
+      document.getElementById("perguntas").value = "5";
+      document.getElementById("editora").value = "CPID - Casa Publicadora da Igreja de Deus";
+      document.getElementById("resultado").innerText = "Preencha os campos ao lado e clique em “Gerar Material”.";
+      mostrarStatus("Campos limpos.", "ok");
+    }
+
+    function mostrarStatus(mensagem, tipo) {
+      const status = document.getElementById("status");
+      status.innerText = mensagem;
+      status.className = "status " + tipo;
+
+      setTimeout(() => {
+        status.innerText = "";
+        status.className = "status";
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
