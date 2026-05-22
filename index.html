@@ -10,8 +10,6 @@
     const MINHA_CHAVE_API = "AIzaSyA6PxEkmKXTFcWvwwvq-tp5Swa55idozOE";
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai@0.1.1/dist/index.min.js"></script>
-
   <style>
     :root {
       --marrom: #4b2e1e;
@@ -362,31 +360,40 @@
         painelResultado.innerText = "O Gemini está produzindo o seu material teológico completo...\nIsso leva de 15 a 45 segundos devido ao tamanho do texto. Por favor, aguarde.";
         mostrarStatus("Enviando solicitação...", "ok");
 
-        // Conexão direta usando a biblioteca tradicional e estável
-        if (typeof window.GoogleGenAI === "undefined" && typeof genocide === "undefined" && !window.GenerativeAI && !window.js_generative_ai) {
-          // Fallback seguro caso o objeto mude de nome de acordo com o cdn universal
-          const SDK = window['@google/generative-ai'] || window.GoogleGenAI;
+        const promptCompleto = criarPromptTexto();
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MINHA_CHAVE_API}`;
+
+        const resposta = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptCompleto }] }]
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Falha na comunicação. Verifique se a sua Chave API está correta e sem espaços.");
         }
 
-        // Inicialização padrão do ecossistema Google AI script
-        const genAI = new GoogleGenAI.GoogleGenAI({ apiKey: MINHA_CHAVE_API });
-        // Utilizando o modelo robusto atualizado
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const promptCompleto = criarPromptTexto();
-        const resultadoIA = await model.generateContent(promptCompleto);
-        const textoGerado = resultadoIA.response.text();
-
-        painelResultado.innerText = textoGerado;
-        mostrarStatus("Material Bíblico gerado com sucesso!", "ok");
+        const dados = await resposta.json();
+        
+        // Verifica se o Gemini retornou o texto corretamente
+        if (dados.candidates && dados.candidates[0].content && dados.candidates[0].content.parts) {
+            const textoGerado = dados.candidates[0].content.parts[0].text;
+            painelResultado.innerText = textoGerado;
+            mostrarStatus("Material Bíblico gerado com sucesso!", "ok");
+        } else {
+            throw new Error("O Gemini respondeu, mas não enviou o texto esperado.");
+        }
 
       } catch (error) {
         console.error(error);
-        painelResultado.innerText = "Ocorreu um erro técnico ao gerar o conteúdo.\n\nVerifique se copiou a chave corretamente sem espaços vazios.\n\nDetalhes do erro: " + error.message;
+        painelResultado.innerText = "Ocorreu um erro técnico ao gerar o conteúdo.\n\nDetalhes do erro: " + error.message;
         mostrarStatus("Falha na execução.", "erro");
       } finally {
         btnGerar.disabled = false;
-        genGerar.innerText = "Gerar Material com Gemini";
+        btnGerar.innerText = "Gerar Material com Gemini";
       }
     }
 
