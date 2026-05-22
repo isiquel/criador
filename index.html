@@ -123,7 +123,6 @@
     .btn-imprimir { background: #263238; color: white; }
     .btn-imprimir:hover { filter: brightness(1.15); }
 
-    /* Ajustado para formatar o texto do Markdown corretamente */
     #resultado {
       background: #fffdf8;
       border: 1px solid #eadcc2;
@@ -136,7 +135,6 @@
       color: #333;
     }
 
-    /* Estilos para deixar a resposta da IA bonita */
     #resultado h1, #resultado h2, #resultado h3 {
       color: var(--marrom);
       margin-top: 1.5em;
@@ -189,7 +187,6 @@
   <main class="container">
     <section class="card painel">
       <h2>Configurar Material</h2>
-
       <label for="tipo">Tipo de material</label>
       <select id="tipo">
         <option value="revista_ebd">Revista de EBD</option>
@@ -207,7 +204,7 @@
         <option value="Almeida Revista e Corrigida (ARC)">Almeida Revista e Corrigida (ARC)</option>
         <option value="Nova Versão Internacional (NVI)">Nova Versão Internacional (NVI)</option>
         <option value="Nova Almeida Atualizada (NAA)">Nova Almeida Atualizada (NAA)</option>
-        <option value="Textos Originais (Hebraico/Grego) e análise profunda do Léxico Strong">Textos Originais (Hebraico/Grego) + Léxico Strong</option>
+        <option value="Textos Originais (Hebraico/Grego)">Textos Originais (Hebraico/Grego) + Léxico Strong</option>
         <option value="Linguagem de Hoje (NTLH)">Nova Tradução na Linguagem de Hoje (NTLH)</option>
       </select>
 
@@ -229,7 +226,6 @@
             <option>Liderança da Igreja</option>
           </select>
         </div>
-
         <div>
           <label for="tom">Linguagem</label>
           <select id="tom">
@@ -246,7 +242,6 @@
           <label for="licoes">Qtd. de Lições/Dias</label>
           <input id="licoes" type="number" min="1" max="5" value="1" />
         </div>
-
         <div>
           <label for="perguntas">Perguntas por lição</label>
           <input id="perguntas" type="number" min="1" max="10" value="5" />
@@ -288,26 +283,10 @@
   </footer>
 
   <script>
-    function pegarValor(id) {
-      return document.getElementById(id).value.trim();
-    }
-
-    function nomeTipo(tipo) {
-      const nomes = {
-        revista_ebd: "Revista de EBD",
-        licao_professor: "Lição para Professor",
-        licao_aluno: "Lição para Aluno",
-        apostila: "Apostila Teológica",
-        sermao: "Sermão",
-        estudo_biblico: "Estudo Bíblico",
-        livro: "Livro Cristão",
-        devocional: "Devocional"
-      };
-      return nomes[tipo] || "Material Bíblico";
-    }
+    function pegarValor(id) { return document.getElementById(id).value.trim(); }
 
     function criarPromptTexto() {
-      const tipo = nomeTipo(pegarValor("tipo"));
+      const tipo = pegarValor("tipo");
       const traducao = pegarValor("traducao");
       const titulo = pegarValor("titulo") || "Material Bíblico";
       const tema = pegarValor("tema") || "Tema a definir";
@@ -316,130 +295,54 @@
       const licoes = pegarValor("licoes") || "1";
       const perguntas = pegarValor("perguntas") || "5";
       const textoBase = pegarValor("textoBase") || "Texto bíblico a definir";
-      const comentarista = pegarValor("comentarista") || "Comentarista a definir";
-      const editora = pegarValor("editora") || "Editora / Ministério";
+      const comentarista = pegarValor("comentarista") || "Comentarista";
+      const editora = pegarValor("editora") || "Editora";
       const orientacoes = pegarValor("orientacoes") || "Sem orientações adicionais.";
 
-      let prompt = `Você é um respeitado teólogo, exegeta e professor de teologia. Escreva um material bíblico profissional de altíssimo nível doutrinário, extremamente detalhado e profundo com base nos parâmetros abaixo:\n\n`;
-      prompt += `• TIPO DE MATERIAL: ${tipo}\n`;
-      prompt += `• TRADUÇÃO / ABORDAGEM BÍBLICA: ${traducao}\n`;
-      prompt += `• TÍTULO: ${titulo}\n`;
-      prompt += `• TEMA CENTRAL: ${tema}\n`;
-      prompt += `• PÚBLICO-ALVO: ${publico}\n`;
-      prompt += `• LINGUAGEM/TOM: ${tom}\n`;
-      prompt += `• QUANTIDADE DE LIÇÕES OU DIAS: ${licoes}\n`;
-      prompt += `• PERGUNTAS DE FIXAÇÃO POR LIÇÃO: ${perguntas}\n`;
-      prompt += `• TEXTO BÍBLICO BASE: ${textoBase}\n`;
-      prompt += `• AUTOR/COMENTARISTA: ${comentarista}\n`;
-      prompt += `• EDITORA/MINISTÉRIO: ${editora}\n`;
-      prompt += `• ORIENTAÇÕES ADICIONAIS: ${orientacoes}\n\n`;
-
-      prompt += `INSTRUÇÕES OBRIGATÓRIAS DE CONTEÚDO:\n`;
-      prompt += `1. Se a tradução selecionada for 'Textos Originais', extraia os termos originais em Hebraico (para o Antigo Testamento) ou Grego (para o Novo Testamento), exiba as palavras transliteradas e faça a correlação com os significados teológicos baseados no Léxico Strong.\n`;
-      prompt += `2. Forneça conteúdo completo e extenso para cada uma das lições/capítulos solicitados. Não resuma de forma alguma.\n`;
-      prompt += `3. Estruture o texto usando a seguinte ordem clara:\n`;
-      prompt += `   - Capa Textual (Título, Autor, Ministério)\n`;
-      prompt += `   - Apresentação e Objetivo Geral do Material\n`;
-      prompt += `   - Sumário das Lições\n`;
-      prompt += `   - Para cada Lição:\n`;
-      prompt += `     * TÍTULO DA LIÇÃO\n`;
-      prompt += `     * TEXTO ÁUREO\n`;
-      prompt += `     * VERDADE PRÁTICA\n`;
-      prompt += `     * LEITURA BÍBLICA EM CLASSE\n`;
-      prompt += `     * INTRODUÇÃO DA LIÇÃO\n`;
-      prompt += `     * DESENVOLVIMENTO (Mínimo 3 tópicos substanciais)\n`;
-      prompt += `     * APLICAÇÃO DIÁRIA E PASTORAL\n`;
-      prompt += `     * SINOPSE DA LIÇÃO\n`;
-      prompt += `     * CONCLUSÃO\n`;
-      prompt += `     * REVISANDO O CONTEÚDO (Exatamente as ${perguntas} perguntas estruturadas com respostas detalhadas inclusas).\n\n`;
-      
-      return prompt;
+      return `Você é um respeitado teólogo e exegeta. Escreva um material bíblico profissional de altíssimo nível doutrinário com base nestes dados:
+      Tipo: ${tipo}, Tradução: ${traducao}, Título: ${titulo}, Tema: ${tema}, Público: ${publico}, Tom: ${tom}, Qtd: ${licoes}, Perguntas: ${perguntas}, Texto Base: ${textoBase}, Autor: ${comentarista}, Editora: ${editora}, Observações: ${orientacoes}. 
+      Estruture com: Capa, Apresentação, Sumário, Lições detalhadas (Título, Texto Áureo, Verdade Prática, Leitura, Introdução, Desenvolvimento, Aplicação, Sinopse, Conclusão, ${perguntas} perguntas com respostas).`;
     }
 
     async function gerarMaterialComGemini() {
       const btnGerar = document.getElementById("btnGerar");
-      const painelResultado = document.getElementById("resultado");
+      const painel = document.getElementById("resultado");
 
-      if (!MINHA_CHAVE_API || MINHA_CHAVE_API === "COLE_SUA_CHAVE_AQUI_DENTRO") {
-        mostrarStatus("Erro: Falta colar a chave API dentro do código!", "erro");
-        painelResultado.innerHTML = "<p style='color:red;'><strong>Erro:</strong> Você esqueceu de colar a sua nova chave API do Gemini na linha 13 do código.</p>";
+      if (!MINHA_CHAVE_API || MINHA_CHAVE_API.includes("COLE")) {
+        alert("Erro: Configure a chave API no código.");
         return;
       }
 
+      btnGerar.disabled = true;
+      btnGerar.innerText = "Processando...";
+      painel.innerHTML = "Consultando inteligência artificial, aguarde...";
+
       try {
-        btnGerar.disabled = true;
-        btnGerar.innerText = "Conectando ao Gemini... Aguarde...";
-        painelResultado.innerHTML = "<p>O Gemini está produzindo o seu material teológico completo...<br><br>Isso leva de 15 a 45 segundos devido ao tamanho do texto. Por favor, aguarde.</p>";
-        mostrarStatus("Enviando solicitação...", "ok");
-
-        const promptCompleto = criarPromptTexto();
-
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MINHA_CHAVE_API}`;
-
-        const resposta = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptCompleto }] }]
-          })
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MINHA_CHAVE_API}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: criarPromptTexto() }] }] })
         });
 
-        if (!resposta.ok) {
-          throw new Error(`Erro na API (${resposta.status}). Verifique se a sua Chave API está correta e ativada.`);
-        }
-
-        const dados = await resposta.json();
+        const result = await response.json();
+        if (result.error) throw new Error(result.error.message);
         
-        if (dados.candidates && dados.candidates[0].content && dados.candidates[0].content.parts) {
-            const textoGerado = dados.candidates[0].content.parts[0].text;
-            // APLICANDO A MELHORIA: Renderiza o texto do Gemini como HTML formatado
-            painelResultado.innerHTML = marked.parse(textoGerado);
-            mostrarStatus("Material Bíblico gerado com sucesso!", "ok");
-        } else {
-            throw new Error("O Gemini respondeu, mas não enviou o texto esperado.");
-        }
-
-      } catch (error) {
-        console.error(error);
-        painelResultado.innerHTML = `<p style="color:red;"><strong>Ocorreu um erro técnico ao gerar o conteúdo.</strong><br><br>Detalhes do erro: ${error.message}</p>`;
-        mostrarStatus("Falha na execução.", "erro");
+        const texto = result.candidates[0].content.parts[0].text;
+        painel.innerHTML = marked.parse(texto);
+      } catch (err) {
+        painel.innerHTML = "Erro: " + err.message;
       } finally {
         btnGerar.disabled = false;
         btnGerar.innerText = "Gerar Material com Gemini";
       }
     }
 
-    async function copiarResultado() {
-      // Usando innerText pegamos apenas o texto legível, sem os códigos HTML que o marked gerou
-      const texto = document.getElementById("resultado").innerText;
-      try {
-        await navigator.clipboard.writeText(texto);
-        mostrarStatus("Texto copiado com sucesso!", "ok");
-      } catch (erro) {
-        mostrarStatus("Selecione o texto manualmente para copiar.", "erro");
-      }
+    function copiarResultado() {
+      navigator.clipboard.writeText(document.getElementById("resultado").innerText);
+      alert("Texto copiado!");
     }
 
-    function limparTudo() {
-      document.getElementById("titulo").value = "";
-      document.getElementById("tema").value = "";
-      document.getElementById("textoBase").value = "";
-      document.getElementById("orientacoes").value = "";
-      document.getElementById("licoes").value = "1";
-      document.getElementById("perguntas").value = "5";
-      document.getElementById("resultado").innerHTML = "Preencha os campos ao lado e clique em “Gerar Material com Gemini”. O conteúdo aparecerá aqui de forma formatada.";
-      mostrarStatus("Campos limpos.", "ok");
-    }
-
-    function mostrarStatus(mensagem, tipo) {
-      const status = document.getElementById("status");
-      status.innerText = mensagem;
-      status.className = "status " + tipo;
-      setTimeout(() => {
-        status.innerText = "";
-        status.className = "status";
-      }, 5000);
-    }
+    function limparTudo() { location.reload(); }
   </script>
 </body>
 </html>
