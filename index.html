@@ -4,13 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerador CPID de Materiais Bíblicos</title>
-
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-  <script>
-    // 🔴 ISIQUELE, COLE A SUA CHAVE DA API DO GEMINI ENTRE AS ASPAS ABAIXO:
-    const MINHA_CHAVE_API = "AIzaSyCknZ9QzlIo4RpEjdUs5D3TdwF4A-02xCM";
-  </script>
 
   <style>
     :root {
@@ -281,9 +275,14 @@
   <footer>
     Sistema CPID Inteligente para criação de materiais bíblicos.
   </footer>
-
   <script>
-    function pegarValor(id) { return document.getElementById(id).value.trim(); }
+    // 🔴 ISIQUELE, COLE A SUA CHAVE DA API DO GEMINI ENTRE AS ASPAS ABAIXO:
+    // Lembre-se: não compartilhe essa chave com ninguém!
+    const MINHA_CHAVE_API = "AIzaSyCknZ9QzlIo4RpEjdUs5D3TdwF4A-02xCM";
+
+    function pegarValor(id) { 
+      return document.getElementById(id).value.trim(); 
+    }
 
     function criarPromptTexto() {
       const tipo = pegarValor("tipo");
@@ -307,30 +306,48 @@
     async function gerarMaterialComGemini() {
       const btnGerar = document.getElementById("btnGerar");
       const painel = document.getElementById("resultado");
+      const statusDiv = document.getElementById("status");
 
       if (!MINHA_CHAVE_API || MINHA_CHAVE_API.includes("COLE")) {
-        alert("Erro: Configure a chave API no código.");
+        alert("Erro: Configure a sua chave da API no código antes de prosseguir.");
         return;
       }
 
       btnGerar.disabled = true;
       btnGerar.innerText = "Processando...";
       painel.innerHTML = "Consultando inteligência artificial, aguarde...";
+      statusDiv.className = "status";
+      statusDiv.innerText = "Conectando ao Gemini...";
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MINHA_CHAVE_API}`, {
+        // Usando o endpoint correto e atualizado do Gemini 1.5 Flash
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MINHA_CHAVE_API}`;
+        
+        const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: criarPromptTexto() }] }] })
+          body: JSON.stringify({ 
+            contents: [{ parts: [{ text: criarPromptTexto() }] }] 
+          })
         });
 
         const result = await response.json();
-        if (result.error) throw new Error(result.error.message);
+        
+        if (result.error) {
+            throw new Error(result.error.message);
+        }
         
         const texto = result.candidates[0].content.parts[0].text;
         painel.innerHTML = marked.parse(texto);
+        
+        statusDiv.innerText = "Material gerado com sucesso!";
+        statusDiv.className = "status ok";
+        
       } catch (err) {
-        painel.innerHTML = "Erro: " + err.message;
+        painel.innerHTML = "Erro ao gerar conteúdo: " + err.message;
+        statusDiv.innerText = "Erro na conexão.";
+        statusDiv.className = "status erro";
+        console.error("Erro detalhado:", err);
       } finally {
         btnGerar.disabled = false;
         btnGerar.innerText = "Gerar Material com Gemini";
@@ -338,11 +355,15 @@
     }
 
     function copiarResultado() {
-      navigator.clipboard.writeText(document.getElementById("resultado").innerText);
-      alert("Texto copiado!");
+      const texto = document.getElementById("resultado").innerText;
+      if (!texto) return;
+      navigator.clipboard.writeText(texto);
+      alert("Texto copiado para a área de transferência!");
     }
 
-    function limparTudo() { location.reload(); }
+    function limparTudo() { 
+      location.reload(); 
+    }
   </script>
 </body>
 </html>
