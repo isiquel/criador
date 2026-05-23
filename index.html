@@ -18,6 +18,7 @@
       --branco: #ffffff;
       --verde: #2e7d32;
       --vermelho: #b3261e;
+      --cinza: #444;
       --borda: #ddd;
     }
 
@@ -48,6 +49,7 @@
     header p {
       margin: 10px 0 0;
       font-size: 16px;
+      opacity: 0.95;
     }
 
     .container {
@@ -283,7 +285,7 @@
 <body>
   <header>
     <h1>Gerador CPID de Materiais Bíblicos</h1>
-    <p>Revistas de EBD, lições bíblicas, apostilas, sermões, estudos, livros e devocionais com Gemini</p>
+    <p>Revistas de EBD, lições bíblicas, apostilas, sermões, estudos e livros cristãos com Gemini</p>
   </header>
 
   <main class="container">
@@ -295,7 +297,7 @@
       </div>
 
       <div class="aviso">
-        Cada tipo de material tem sua própria estrutura. Sermão gera sermão, devocional gera devocional, estudo gera estudo, livro gera livro e revista gera revista.
+        Preencha os campos e clique em “Gerar Material com Gemini”. O Gemini será o cérebro do aplicativo.
       </div>
 
       <label for="tipo">Tipo de material</label>
@@ -348,12 +350,12 @@
 
       <div class="linha">
         <div>
-          <label for="quantidade">Quantidade de lições/capítulos/dias</label>
-          <input id="quantidade" type="number" min="1" max="30" value="1" />
+          <label for="quantidade">Quantidade de lições/capítulos</label>
+          <input id="quantidade" type="number" min="1" max="20" value="1" />
         </div>
 
         <div>
-          <label for="perguntas">Perguntas por lição/capítulo</label>
+          <label for="perguntas">Perguntas por lição</label>
           <input id="perguntas" type="number" min="1" max="10" value="5" />
         </div>
       </div>
@@ -367,20 +369,20 @@
       <label for="orientacoes">Orientações adicionais</label>
       <textarea id="orientacoes" placeholder="Ex: crie uma mensagem bíblica forte, pastoral e bem organizada."></textarea>
 
-      <button class="btn-principal" id="btnGerar" type="button" onclick="window.gerarMaterialComGemini()">
+      <button class="btn-principal" id="btnGerar" type="button">
         Gerar Material com Gemini
       </button>
 
-      <button class="btn-prompt" id="btnPrompt" type="button" onclick="window.mostrarPrompt()">
+      <button class="btn-prompt" id="btnPrompt" type="button">
         Ver Prompt Antes de Gerar
       </button>
 
       <div class="botoes">
-        <button class="btn-copiar" id="btnCopiar" type="button" onclick="window.copiarResultado()">Copiar Texto</button>
-        <button class="btn-imprimir" id="btnImprimir" type="button" onclick="window.print()">Imprimir / Salvar PDF</button>
+        <button class="btn-copiar" id="btnCopiar" type="button">Copiar Texto</button>
+        <button class="btn-imprimir" id="btnImprimir" type="button">Imprimir / Salvar PDF</button>
       </div>
 
-      <button class="btn-limpar" id="btnLimpar" type="button" onclick="window.limparTudo()">Limpar Tudo</button>
+      <button class="btn-limpar" id="btnLimpar" type="button">Limpar Tudo</button>
 
       <div id="status" class="status"></div>
     </section>
@@ -398,38 +400,60 @@
   </div>
 
   <script>
+    /*
+      PASSO 1:
+      Cole sua chave nova do Gemini abaixo, dentro das aspas.
+
+      Exemplo:
+      const GEMINI_API_KEY = "AIzaXXXXXXXXXXXXXXXXXXXX";
+
+      Atenção:
+      Se publicar este arquivo em GitHub público, sua chave ficará visível.
+    */
+
     const GEMINI_API_KEY = "AIzaSyBU_sqQH3fkU_yMN59fSHIc8Nrb68mkFFs";
 
+    /*
+      O primeiro modelo será tentado primeiro.
+      Se não funcionar, o sistema tenta os próximos.
+    */
     const MODELOS_GEMINI = [
-      "gemini-1.5-flash",
+      "gemini-2.5-flash",
       "gemini-2.0-flash",
-      "gemini-2.5-flash"
+      "gemini-1.5-flash"
     ];
 
-    window.onerror = function (mensagem, arquivo, linha, coluna, erro) {
-      const painel = document.getElementById("resultado");
-      const status = document.getElementById("status");
+    document.addEventListener("DOMContentLoaded", function () {
+      const btnGerar = document.getElementById("btnGerar");
+      const btnPrompt = document.getElementById("btnPrompt");
+      const btnCopiar = document.getElementById("btnCopiar");
+      const btnImprimir = document.getElementById("btnImprimir");
+      const btnLimpar = document.getElementById("btnLimpar");
 
-      if (painel) {
-        painel.innerText =
-          "Erro no JavaScript:\n\n" +
-          mensagem +
-          "\n\nLinha: " + linha +
-          "\nColuna: " + coluna +
-          "\n\nIsso impediu o botão de funcionar.";
+      if (btnGerar) {
+        btnGerar.addEventListener("click", gerarMaterialComGemini);
       }
 
-      if (status) {
-        status.innerText = "Erro no código. Veja o painel de resultado.";
-        status.className = "status erro";
+      if (btnPrompt) {
+        btnPrompt.addEventListener("click", mostrarPrompt);
       }
 
-      return false;
-    };
+      if (btnCopiar) {
+        btnCopiar.addEventListener("click", copiarResultado);
+      }
 
-    window.onload = function () {
+      if (btnImprimir) {
+        btnImprimir.addEventListener("click", function () {
+          window.print();
+        });
+      }
+
+      if (btnLimpar) {
+        btnLimpar.addEventListener("click", limparTudo);
+      }
+
       mostrarStatus("Aplicativo carregado. Pode gerar o material.", "ok");
-    };
+    });
 
     function valor(id) {
       const campo = document.getElementById(id);
@@ -455,278 +479,6 @@
       return true;
     }
 
-    function criarEstruturaPorTipo(tipo) {
-      if (tipo === "Sermão") {
-        return `
-GERE SOMENTE UM SERMÃO.
-
-Estrutura obrigatória:
-# Título do Sermão
-# Texto Base
-# Tema
-# Introdução
-# Proposição
-# Frase de Transição
-# I - Primeiro ponto
-# II - Segundo ponto
-# III - Terceiro ponto
-# Aplicação para a Igreja
-# Conclusão
-# Apelo
-
-Regras específicas:
-- Não faça capa de revista.
-- Não faça sumário de revista.
-- Não coloque perguntas de EBD, a menos que eu peça nas orientações.
-- Use linguagem de púlpito, pastoral, espiritual e bíblica.
-- Desenvolva bem cada ponto.
-- Inclua aplicações práticas para a vida cristã.
-`;
-      }
-
-      if (tipo === "Devocional") {
-        return `
-GERE SOMENTE UM DEVOCIONAL.
-
-Se a quantidade for 1, crie um devocional único.
-Se a quantidade for maior que 1, crie uma sequência de devocionais conforme a quantidade informada.
-
-Estrutura obrigatória para cada devocional:
-# Devocional
-## Título
-## Texto Bíblico
-## Meditação
-## Aplicação do Dia
-## Pergunta para Reflexão
-## Oração
-
-Regras específicas:
-- Não faça formato de revista.
-- Não faça sumário, texto áureo ou verdade prática.
-- Não faça tópicos longos como sermão.
-- Use linguagem íntima, pastoral, devocional e reflexiva.
-- A meditação deve tocar o coração e conduzir à oração.
-`;
-      }
-
-      if (tipo === "Estudo bíblico") {
-        return `
-GERE SOMENTE UM ESTUDO BÍBLICO.
-
-Estrutura obrigatória:
-# Título do Estudo
-# Texto Base
-# Objetivo do Estudo
-# Introdução
-# Contexto Bíblico
-# Explicação do Texto
-# Ensinamentos Principais
-# Aplicações Práticas
-# Perguntas para Discussão
-# Conclusão
-
-Regras específicas:
-- Não faça formato de revista de EBD.
-- Não faça sermão com apelo final, a menos que faça sentido.
-- O foco deve ser ensino, explicação bíblica e aplicação.
-- Use linguagem clara, didática e bíblica.
-`;
-      }
-
-      if (tipo === "Livro cristão") {
-        return `
-GERE SOMENTE UM LIVRO CRISTÃO.
-
-A quantidade informada deve ser entendida como quantidade de capítulos.
-
-Estrutura obrigatória:
-# Capa Textual
-# Título
-# Autor
-# Editora / Ministério
-# Apresentação
-# Prefácio
-# Sumário
-
-Depois desenvolva os capítulos conforme a quantidade informada.
-
-Cada capítulo deve ter:
-- Título do capítulo
-- Introdução do capítulo
-- Desenvolvimento bíblico e pastoral
-- Aplicações práticas
-- Conclusão do capítulo
-
-Finalize com:
-# Conclusão Geral
-# Palavra Final ao Leitor
-
-Regras específicas:
-- Não faça formato de revista de EBD.
-- Não coloque texto áureo, verdade prática e revisão de conteúdo.
-- Escreva com estilo de livro cristão, organizado, profundo e pastoral.
-`;
-      }
-
-      if (tipo === "Apostila teológica") {
-        return `
-GERE SOMENTE UMA APOSTILA TEOLÓGICA.
-
-A quantidade informada deve ser entendida como quantidade de aulas ou capítulos.
-
-Estrutura obrigatória:
-# Capa Textual
-# Título da Apostila
-# Autor
-# Editora / Ministério
-# Apresentação
-# Ementa
-# Objetivo Geral
-# Objetivos Específicos
-# Sumário
-
-Para cada aula ou capítulo:
-## Aula / Capítulo
-## Tema da Aula
-## Texto Bíblico Base
-## Introdução
-## Desenvolvimento Teológico
-## Fundamentação Bíblica
-## Aplicação Ministerial
-## Resumo da Aula
-## Exercícios de Fixação
-
-Finalize com:
-# Conclusão Geral
-# Bibliografia Bíblica Sugerida
-
-Regras específicas:
-- Não faça sermão.
-- Não faça devocional.
-- Não faça revista de EBD.
-- O foco deve ser ensino teológico organizado.
-`;
-      }
-
-      if (tipo === "Revista de EBD para professor") {
-        return `
-GERE SOMENTE UMA REVISTA DE EBD PARA PROFESSOR.
-
-A quantidade informada deve ser entendida como quantidade de lições.
-
-Estrutura obrigatória:
-# Capa Textual
-# Título da Revista
-# Tema do Trimestre
-# Comentarista
-# Editora / Ministério
-# Apresentação
-# Sumário
-
-Para cada lição:
-## Lição
-## Título da Lição
-## Texto Áureo
-## Verdade Prática
-## Leitura Bíblica em Classe
-## Objetivos da Lição
-## Palavra-chave
-## Introdução
-## I - Primeiro tópico
-## II - Segundo tópico
-## III - Terceiro tópico
-## Auxílio ao Professor
-## Aplicação Pessoal
-## Sinopse da Lição
-## Conclusão
-## Revisando o Conteúdo
-
-No Revisando o Conteúdo:
-- Inclua perguntas e respostas.
-- A quantidade de perguntas deve seguir o campo informado.
-
-Regras específicas:
-- Esta versão é para professor.
-- Inclua respostas das perguntas.
-- Use linguagem didática e pastoral.
-`;
-      }
-
-      if (tipo === "Revista de EBD para aluno") {
-        return `
-GERE SOMENTE UMA REVISTA DE EBD PARA ALUNO.
-
-A quantidade informada deve ser entendida como quantidade de lições.
-
-Estrutura obrigatória:
-# Capa Textual
-# Título da Revista
-# Tema do Trimestre
-# Editora / Ministério
-# Apresentação
-# Sumário
-
-Para cada lição:
-## Lição
-## Título da Lição
-## Texto Áureo
-## Verdade Prática
-## Leitura Bíblica em Classe
-## Objetivos da Lição
-## Introdução
-## I - Primeiro tópico
-## II - Segundo tópico
-## III - Terceiro tópico
-## Aplicação Pessoal
-## Conclusão
-## Revisando o Conteúdo
-
-No Revisando o Conteúdo:
-- Inclua somente as perguntas.
-- Não inclua respostas, pois é revista do aluno.
-
-Regras específicas:
-- Esta versão é para aluno.
-- Não coloque respostas das perguntas.
-- Use linguagem clara, bíblica e acessível.
-`;
-      }
-
-      if (tipo === "Lição bíblica completa") {
-        return `
-GERE SOMENTE UMA LIÇÃO BÍBLICA COMPLETA.
-
-Estrutura obrigatória:
-# Título da Lição
-# Texto Áureo
-# Verdade Prática
-# Leitura Bíblica em Classe
-# Objetivos da Lição
-# Introdução
-# I - Primeiro tópico
-# II - Segundo tópico
-# III - Terceiro tópico
-# Aplicação Pessoal
-# Sinopse da Lição
-# Conclusão
-# Revisando o Conteúdo
-
-No Revisando o Conteúdo:
-- Inclua perguntas e respostas conforme a quantidade informada.
-
-Regras específicas:
-- Não faça livro.
-- Não faça apostila.
-- Não faça devocional.
-- Faça uma lição organizada para ensino bíblico.
-`;
-      }
-
-      return `
-GERE UM MATERIAL BÍBLICO ORGANIZADO, ORIGINAL, PASTORAL E DIDÁTICO.
-`;
-    }
-
     function criarPromptTexto() {
       const tipo = valor("tipo");
       const titulo = valor("titulo") || "Material Bíblico";
@@ -739,12 +491,11 @@ GERE UM MATERIAL BÍBLICO ORGANIZADO, ORIGINAL, PASTORAL E DIDÁTICO.
       const autor = valor("autor") || "Comentarista a definir";
       const editora = valor("editora") || "CPID - Casa Publicadora da Igreja de Deus";
       const orientacoes = valor("orientacoes") || "Sem orientações adicionais.";
-      const estrutura = criarEstruturaPorTipo(tipo);
 
       return `
 Você é um assistente editorial cristão, bíblico, teológico e pastoral.
 
-Crie o material conforme as informações abaixo.
+Crie um material completo seguindo exatamente as informações abaixo:
 
 TIPO DE MATERIAL:
 ${tipo}
@@ -764,10 +515,10 @@ ${publico}
 LINGUAGEM:
 ${linguagem}
 
-QUANTIDADE DE LIÇÕES, CAPÍTULOS OU DIAS:
+QUANTIDADE DE LIÇÕES OU CAPÍTULOS:
 ${quantidade}
 
-PERGUNTAS POR LIÇÃO OU CAPÍTULO:
+PERGUNTAS POR LIÇÃO:
 ${perguntas}
 
 COMENTARISTA / AUTOR:
@@ -779,7 +530,7 @@ ${editora}
 ORIENTAÇÕES ADICIONAIS:
 ${orientacoes}
 
-REGRAS GERAIS:
+REGRAS DE PRODUÇÃO:
 1. Escreva em português do Brasil.
 2. Use linguagem bíblica, pastoral, reverente, didática e organizada.
 3. Crie conteúdo original.
@@ -790,14 +541,129 @@ REGRAS GERAIS:
 8. Não invente citações de autores.
 9. Use a Bíblia como base principal.
 10. Use formatação em Markdown com títulos e subtítulos.
-11. Respeite exatamente o tipo de material escolhido.
-12. Não misture estrutura de revista, sermão, livro, apostila, estudo e devocional.
 
-ESTRUTURA ESPECÍFICA PARA ESTE TIPO DE MATERIAL:
-${estrutura}
+SE FOR REVISTA OU LIÇÃO, USE ESTA ESTRUTURA:
+# Capa textual
+- Título
+- Tema
+- Comentarista
+- Editora / Ministério
+
+# Apresentação
+# Sumário
+
+Para cada lição:
+## Lição
+## Título da lição
+## Texto Áureo
+## Verdade Prática
+## Leitura Bíblica em Classe
+## Objetivos da Lição
+## Introdução
+## I - Primeiro tópico
+## II - Segundo tópico
+## III - Terceiro tópico
+## Aplicação Pessoal
+## Sinopse da Lição
+## Conclusão
+## Revisando o Conteúdo
+Inclua perguntas e respostas, conforme a quantidade solicitada.
+
+SE FOR SERMÃO, USE ESTA ESTRUTURA:
+# Título
+# Texto Base
+# Introdução
+# Proposição
+# Desenvolvimento com 3 pontos principais
+# Aplicação
+# Conclusão
+# Apelo
+
+SE FOR APOSTILA OU LIVRO, USE ESTA ESTRUTURA:
+# Capa textual
+# Apresentação
+# Sumário
+# Capítulos
+# Desenvolvimento bíblico e teológico
+# Aplicações práticas
+# Perguntas para revisão
+# Conclusão geral
 
 Agora gere o material completo.
       `;
+    }
+
+    async function gerarMaterialComGemini() {
+      const painel = document.getElementById("resultado");
+      const botao = document.getElementById("btnGerar");
+
+      if (!painel) {
+        alert("Erro: área de resultado não encontrada.");
+        return;
+      }
+
+      if (!validarChave()) {
+        return;
+      }
+
+      const titulo = valor("titulo");
+      const tema = valor("tema");
+
+      if (!titulo && !tema) {
+        alert("Preencha pelo menos o título ou o tema.");
+        return;
+      }
+
+      botao.disabled = true;
+      botao.innerText = "Gerando...";
+      painel.innerText = "Conectando com o Gemini... aguarde.";
+      mostrarStatus("Pedido enviado para o Gemini.", "ok");
+
+      const prompt = criarPromptTexto();
+
+      let ultimoErro = "";
+
+      try {
+        for (let i = 0; i < MODELOS_GEMINI.length; i++) {
+          const modeloAtual = MODELOS_GEMINI[i];
+
+          try {
+            mostrarStatus("Tentando gerar com o modelo: " + modeloAtual, "ok");
+
+            const textoGerado = await chamarGemini(modeloAtual, prompt);
+
+            if (textoGerado) {
+              renderizarResultado(textoGerado);
+              mostrarStatus("Material gerado com sucesso usando: " + modeloAtual, "ok");
+              return;
+            }
+
+          } catch (erroModelo) {
+            ultimoErro = erroModelo.message;
+            console.error("Erro com modelo " + modeloAtual + ":", erroModelo);
+          }
+        }
+
+        throw new Error(ultimoErro || "Nenhum modelo conseguiu gerar o material.");
+
+      } catch (erro) {
+        painel.innerText =
+          "Erro ao gerar material:\n\n" +
+          erro.message +
+          "\n\nPossíveis causas:\n" +
+          "1. A chave do Gemini está errada.\n" +
+          "2. A chave antiga foi bloqueada ou revogada.\n" +
+          "3. A API do Gemini não está ativa na sua conta.\n" +
+          "4. O navegador bloqueou a requisição.\n" +
+          "5. Sua chave ficou exposta e precisa ser trocada.\n\n" +
+          "Solução: crie uma chave nova no Google AI Studio, cole no código, salve e atualize a página.";
+
+        mostrarStatus("Erro ao gerar. Veja a mensagem no painel.", "erro");
+
+      } finally {
+        botao.disabled = false;
+        botao.innerText = "Gerar Material com Gemini";
+      }
     }
 
     async function chamarGemini(modelo, prompt) {
@@ -864,11 +730,6 @@ Agora gere o material completo.
     function renderizarResultado(texto) {
       const painel = document.getElementById("resultado");
 
-      if (!painel) {
-        alert("Área de resultado não encontrada.");
-        return;
-      }
-
       if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
         const htmlConvertido = marked.parse(texto);
         const htmlSeguro = DOMPurify.sanitize(htmlConvertido);
@@ -878,90 +739,13 @@ Agora gere o material completo.
       }
     }
 
-    window.gerarMaterialComGemini = async function () {
-      const painel = document.getElementById("resultado");
-      const botao = document.getElementById("btnGerar");
-
-      if (!painel) {
-        alert("Erro: área de resultado não encontrada.");
-        return;
-      }
-
-      if (!validarChave()) {
-        return;
-      }
-
-      const titulo = valor("titulo");
-      const tema = valor("tema");
-
-      if (!titulo && !tema) {
-        alert("Preencha pelo menos o título ou o tema.");
-        return;
-      }
-
-      if (botao) {
-        botao.disabled = true;
-        botao.innerText = "Gerando...";
-      }
-
-      painel.innerText = "Conectando com o Gemini... aguarde.";
-      mostrarStatus("Pedido enviado para o Gemini.", "ok");
-
-      const prompt = criarPromptTexto();
-      let ultimoErro = "";
-
-      try {
-        for (let i = 0; i < MODELOS_GEMINI.length; i++) {
-          const modeloAtual = MODELOS_GEMINI[i];
-
-          try {
-            mostrarStatus("Tentando gerar com o modelo: " + modeloAtual, "ok");
-
-            const textoGerado = await chamarGemini(modeloAtual, prompt);
-
-            if (textoGerado) {
-              renderizarResultado(textoGerado);
-              mostrarStatus("Material gerado com sucesso usando: " + modeloAtual, "ok");
-              return;
-            }
-
-          } catch (erroModelo) {
-            ultimoErro = erroModelo.message;
-            console.error("Erro com modelo " + modeloAtual + ":", erroModelo);
-          }
-        }
-
-        throw new Error(ultimoErro || "Nenhum modelo conseguiu gerar o material.");
-
-      } catch (erro) {
-        painel.innerText =
-          "Erro ao gerar material:\n\n" +
-          erro.message +
-          "\n\nPossíveis causas:\n" +
-          "1. A chave do Gemini está errada.\n" +
-          "2. A chave antiga foi bloqueada ou revogada.\n" +
-          "3. A API do Gemini não está ativa na sua conta.\n" +
-          "4. O navegador bloqueou a requisição.\n" +
-          "5. Sua chave ficou exposta e precisa ser trocada.\n\n" +
-          "Solução: crie uma chave nova no Google AI Studio, cole no código, salve e atualize a página.";
-
-        mostrarStatus("Erro ao gerar. Veja a mensagem no painel.", "erro");
-
-      } finally {
-        if (botao) {
-          botao.disabled = false;
-          botao.innerText = "Gerar Material com Gemini";
-        }
-      }
-    };
-
-    window.mostrarPrompt = function () {
+    function mostrarPrompt() {
       const prompt = criarPromptTexto();
       document.getElementById("resultado").innerText = prompt;
       mostrarStatus("Prompt exibido. Você pode copiar e testar manualmente no Gemini.", "ok");
-    };
+    }
 
-    window.copiarResultado = async function () {
+    async function copiarResultado() {
       const painel = document.getElementById("resultado");
       const texto = painel ? painel.innerText : "";
 
@@ -971,9 +755,9 @@ Agora gere o material completo.
       } catch (erro) {
         mostrarStatus("Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.", "erro");
       }
-    };
+    }
 
-    window.limparTudo = function () {
+    function limparTudo() {
       const campos = [
         "titulo",
         "tema",
@@ -1004,7 +788,7 @@ Agora gere o material completo.
       }
 
       mostrarStatus("Campos limpos.", "ok");
-    };
+    }
   </script>
 </body>
 </html>
