@@ -297,7 +297,7 @@
       </div>
 
       <div class="aviso">
-        Agora cada tipo de material tem sua própria estrutura: sermão gera sermão, devocional gera devocional, livro gera livro, estudo gera estudo e revista gera revista.
+        Cada tipo de material tem sua própria estrutura: sermão gera sermão, devocional gera devocional, livro gera livro, estudo gera estudo e revista gera revista.
       </div>
 
       <label for="tipo">Tipo de material</label>
@@ -369,20 +369,20 @@
       <label for="orientacoes">Orientações adicionais</label>
       <textarea id="orientacoes" placeholder="Ex: crie uma mensagem bíblica forte, pastoral e bem organizada."></textarea>
 
-      <button class="btn-principal" id="btnGerar" type="button">
+      <button class="btn-principal" id="btnGerar" type="button" onclick="gerarMaterialComGemini()">
         Gerar Material com Gemini
       </button>
 
-      <button class="btn-prompt" id="btnPrompt" type="button">
+      <button class="btn-prompt" id="btnPrompt" type="button" onclick="mostrarPrompt()">
         Ver Prompt Antes de Gerar
       </button>
 
       <div class="botoes">
-        <button class="btn-copiar" id="btnCopiar" type="button">Copiar Texto</button>
-        <button class="btn-imprimir" id="btnImprimir" type="button">Imprimir / Salvar PDF</button>
+        <button class="btn-copiar" id="btnCopiar" type="button" onclick="copiarResultado()">Copiar Texto</button>
+        <button class="btn-imprimir" id="btnImprimir" type="button" onclick="window.print()">Imprimir / Salvar PDF</button>
       </div>
 
-      <button class="btn-limpar" id="btnLimpar" type="button">Limpar Tudo</button>
+      <button class="btn-limpar" id="btnLimpar" type="button" onclick="limparTudo()">Limpar Tudo</button>
 
       <div id="status" class="status"></div>
     </section>
@@ -400,7 +400,7 @@
   </div>
 
   <script>
-    const GEMINI_API_KEY = "AIzaSyBJ9d1GCfN0SEtS0_b8-f9LbfZAJ9Cgx2Q;
+    const GEMINI_API_KEY = "AIzaSyBU_sqQH3fkU_yMN59fSHIc8Nrb68mkFFs;
 
     const MODELOS_GEMINI = [
       "gemini-2.5-flash",
@@ -408,17 +408,9 @@
       "gemini-1.5-flash"
     ];
 
-    document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("btnGerar").addEventListener("click", gerarMaterialComGemini);
-      document.getElementById("btnPrompt").addEventListener("click", mostrarPrompt);
-      document.getElementById("btnCopiar").addEventListener("click", copiarResultado);
-      document.getElementById("btnImprimir").addEventListener("click", function () {
-        window.print();
-      });
-      document.getElementById("btnLimpar").addEventListener("click", limparTudo);
-
+    window.onload = function () {
       mostrarStatus("Aplicativo carregado. Pode gerar o material.", "ok");
-    });
+    };
 
     function valor(id) {
       const campo = document.getElementById(id);
