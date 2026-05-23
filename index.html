@@ -18,7 +18,6 @@
       --branco: #ffffff;
       --verde: #2e7d32;
       --vermelho: #b3261e;
-      --cinza: #444;
       --borda: #ddd;
     }
 
@@ -49,7 +48,6 @@
     header p {
       margin: 10px 0 0;
       font-size: 16px;
-      opacity: 0.95;
     }
 
     .container {
@@ -297,7 +295,7 @@
       </div>
 
       <div class="aviso">
-        Cada tipo de material tem sua própria estrutura: sermão gera sermão, devocional gera devocional, livro gera livro, estudo gera estudo e revista gera revista.
+        Cada tipo de material tem sua própria estrutura. Sermão gera sermão, devocional gera devocional, estudo gera estudo, livro gera livro e revista gera revista.
       </div>
 
       <label for="tipo">Tipo de material</label>
@@ -369,20 +367,20 @@
       <label for="orientacoes">Orientações adicionais</label>
       <textarea id="orientacoes" placeholder="Ex: crie uma mensagem bíblica forte, pastoral e bem organizada."></textarea>
 
-      <button class="btn-principal" id="btnGerar" type="button" onclick="gerarMaterialComGemini()">
+      <button class="btn-principal" id="btnGerar" type="button" onclick="window.gerarMaterialComGemini()">
         Gerar Material com Gemini
       </button>
 
-      <button class="btn-prompt" id="btnPrompt" type="button" onclick="mostrarPrompt()">
+      <button class="btn-prompt" id="btnPrompt" type="button" onclick="window.mostrarPrompt()">
         Ver Prompt Antes de Gerar
       </button>
 
       <div class="botoes">
-        <button class="btn-copiar" id="btnCopiar" type="button" onclick="copiarResultado()">Copiar Texto</button>
+        <button class="btn-copiar" id="btnCopiar" type="button" onclick="window.copiarResultado()">Copiar Texto</button>
         <button class="btn-imprimir" id="btnImprimir" type="button" onclick="window.print()">Imprimir / Salvar PDF</button>
       </div>
 
-      <button class="btn-limpar" id="btnLimpar" type="button" onclick="limparTudo()">Limpar Tudo</button>
+      <button class="btn-limpar" id="btnLimpar" type="button" onclick="window.limparTudo()">Limpar Tudo</button>
 
       <div id="status" class="status"></div>
     </section>
@@ -400,13 +398,34 @@
   </div>
 
   <script>
-    const GEMINI_API_KEY = "AIzaSyBU_sqQH3fkU_yMN59fSHIc8Nrb68mkFFs;
+    const GEMINI_API_KEY = "AIzaSyBU_sqQH3fkU_yMN59fSHIc8Nrb68mkFFs";
 
     const MODELOS_GEMINI = [
-      "gemini-2.5-flash",
+      "gemini-1.5-flash",
       "gemini-2.0-flash",
-      "gemini-1.5-flash"
+      "gemini-2.5-flash"
     ];
+
+    window.onerror = function (mensagem, arquivo, linha, coluna, erro) {
+      const painel = document.getElementById("resultado");
+      const status = document.getElementById("status");
+
+      if (painel) {
+        painel.innerText =
+          "Erro no JavaScript:\n\n" +
+          mensagem +
+          "\n\nLinha: " + linha +
+          "\nColuna: " + coluna +
+          "\n\nIsso impediu o botão de funcionar.";
+      }
+
+      if (status) {
+        status.innerText = "Erro no código. Veja o painel de resultado.";
+        status.className = "status erro";
+      }
+
+      return false;
+    };
 
     window.onload = function () {
       mostrarStatus("Aplicativo carregado. Pode gerar o material.", "ok");
@@ -436,23 +455,9 @@
       return true;
     }
 
-    function criarPromptTexto() {
-      const tipo = valor("tipo");
-      const titulo = valor("titulo") || "Material Bíblico";
-      const tema = valor("tema") || "Tema bíblico a definir";
-      const textoBase = valor("textoBase") || "Texto bíblico a definir";
-      const publico = valor("publico") || "Igreja em geral";
-      const linguagem = valor("linguagem") || "Pastoral, bíblica e didática";
-      const quantidade = valor("quantidade") || "1";
-      const perguntas = valor("perguntas") || "5";
-      const autor = valor("autor") || "Comentarista a definir";
-      const editora = valor("editora") || "CPID - Casa Publicadora da Igreja de Deus";
-      const orientacoes = valor("orientacoes") || "Sem orientações adicionais.";
-
-      let estrutura = "";
-
+    function criarEstruturaPorTipo(tipo) {
       if (tipo === "Sermão") {
-        estrutura = `
+        return `
 GERE SOMENTE UM SERMÃO.
 
 Estrutura obrigatória:
@@ -479,8 +484,8 @@ Regras específicas:
 `;
       }
 
-      else if (tipo === "Devocional") {
-        estrutura = `
+      if (tipo === "Devocional") {
+        return `
 GERE SOMENTE UM DEVOCIONAL.
 
 Se a quantidade for 1, crie um devocional único.
@@ -504,8 +509,8 @@ Regras específicas:
 `;
       }
 
-      else if (tipo === "Estudo bíblico") {
-        estrutura = `
+      if (tipo === "Estudo bíblico") {
+        return `
 GERE SOMENTE UM ESTUDO BÍBLICO.
 
 Estrutura obrigatória:
@@ -528,8 +533,8 @@ Regras específicas:
 `;
       }
 
-      else if (tipo === "Livro cristão") {
-        estrutura = `
+      if (tipo === "Livro cristão") {
+        return `
 GERE SOMENTE UM LIVRO CRISTÃO.
 
 A quantidade informada deve ser entendida como quantidade de capítulos.
@@ -543,11 +548,7 @@ Estrutura obrigatória:
 # Prefácio
 # Sumário
 
-Depois desenvolva os capítulos:
-## Capítulo 1
-## Capítulo 2
-## Capítulo 3
-E assim por diante, conforme a quantidade informada.
+Depois desenvolva os capítulos conforme a quantidade informada.
 
 Cada capítulo deve ter:
 - Título do capítulo
@@ -567,8 +568,8 @@ Regras específicas:
 `;
       }
 
-      else if (tipo === "Apostila teológica") {
-        estrutura = `
+      if (tipo === "Apostila teológica") {
+        return `
 GERE SOMENTE UMA APOSTILA TEOLÓGICA.
 
 A quantidade informada deve ser entendida como quantidade de aulas ou capítulos.
@@ -607,8 +608,8 @@ Regras específicas:
 `;
       }
 
-      else if (tipo === "Revista de EBD para professor") {
-        estrutura = `
+      if (tipo === "Revista de EBD para professor") {
+        return `
 GERE SOMENTE UMA REVISTA DE EBD PARA PROFESSOR.
 
 A quantidade informada deve ser entendida como quantidade de lições.
@@ -651,8 +652,8 @@ Regras específicas:
 `;
       }
 
-      else if (tipo === "Revista de EBD para aluno") {
-        estrutura = `
+      if (tipo === "Revista de EBD para aluno") {
+        return `
 GERE SOMENTE UMA REVISTA DE EBD PARA ALUNO.
 
 A quantidade informada deve ser entendida como quantidade de lições.
@@ -691,8 +692,8 @@ Regras específicas:
 `;
       }
 
-      else if (tipo === "Lição bíblica completa") {
-        estrutura = `
+      if (tipo === "Lição bíblica completa") {
+        return `
 GERE SOMENTE UMA LIÇÃO BÍBLICA COMPLETA.
 
 Estrutura obrigatória:
@@ -720,6 +721,25 @@ Regras específicas:
 - Faça uma lição organizada para ensino bíblico.
 `;
       }
+
+      return `
+GERE UM MATERIAL BÍBLICO ORGANIZADO, ORIGINAL, PASTORAL E DIDÁTICO.
+`;
+    }
+
+    function criarPromptTexto() {
+      const tipo = valor("tipo");
+      const titulo = valor("titulo") || "Material Bíblico";
+      const tema = valor("tema") || "Tema bíblico a definir";
+      const textoBase = valor("textoBase") || "Texto bíblico a definir";
+      const publico = valor("publico") || "Igreja em geral";
+      const linguagem = valor("linguagem") || "Pastoral, bíblica e didática";
+      const quantidade = valor("quantidade") || "1";
+      const perguntas = valor("perguntas") || "5";
+      const autor = valor("autor") || "Comentarista a definir";
+      const editora = valor("editora") || "CPID - Casa Publicadora da Igreja de Deus";
+      const orientacoes = valor("orientacoes") || "Sem orientações adicionais.";
+      const estrutura = criarEstruturaPorTipo(tipo);
 
       return `
 Você é um assistente editorial cristão, bíblico, teológico e pastoral.
@@ -778,79 +798,6 @@ ${estrutura}
 
 Agora gere o material completo.
       `;
-    }
-
-    async function gerarMaterialComGemini() {
-      const painel = document.getElementById("resultado");
-      const botao = document.getElementById("btnGerar");
-
-      if (!painel) {
-        alert("Erro: área de resultado não encontrada.");
-        return;
-      }
-
-      if (!validarChave()) {
-        return;
-      }
-
-      const titulo = valor("titulo");
-      const tema = valor("tema");
-
-      if (!titulo && !tema) {
-        alert("Preencha pelo menos o título ou o tema.");
-        return;
-      }
-
-      botao.disabled = true;
-      botao.innerText = "Gerando...";
-      painel.innerText = "Conectando com o Gemini... aguarde.";
-      mostrarStatus("Pedido enviado para o Gemini.", "ok");
-
-      const prompt = criarPromptTexto();
-
-      let ultimoErro = "";
-
-      try {
-        for (let i = 0; i < MODELOS_GEMINI.length; i++) {
-          const modeloAtual = MODELOS_GEMINI[i];
-
-          try {
-            mostrarStatus("Tentando gerar com o modelo: " + modeloAtual, "ok");
-
-            const textoGerado = await chamarGemini(modeloAtual, prompt);
-
-            if (textoGerado) {
-              renderizarResultado(textoGerado);
-              mostrarStatus("Material gerado com sucesso usando: " + modeloAtual, "ok");
-              return;
-            }
-
-          } catch (erroModelo) {
-            ultimoErro = erroModelo.message;
-            console.error("Erro com modelo " + modeloAtual + ":", erroModelo);
-          }
-        }
-
-        throw new Error(ultimoErro || "Nenhum modelo conseguiu gerar o material.");
-
-      } catch (erro) {
-        painel.innerText =
-          "Erro ao gerar material:\n\n" +
-          erro.message +
-          "\n\nPossíveis causas:\n" +
-          "1. A chave do Gemini está errada.\n" +
-          "2. A chave antiga foi bloqueada ou revogada.\n" +
-          "3. A API do Gemini não está ativa na sua conta.\n" +
-          "4. O navegador bloqueou a requisição.\n" +
-          "5. Sua chave ficou exposta e precisa ser trocada.\n\n" +
-          "Solução: crie uma chave nova no Google AI Studio, cole no código, salve e atualize a página.";
-
-        mostrarStatus("Erro ao gerar. Veja a mensagem no painel.", "erro");
-
-      } finally {
-        botao.disabled = false;
-        botao.innerText = "Gerar Material com Gemini";
-      }
     }
 
     async function chamarGemini(modelo, prompt) {
@@ -917,6 +864,11 @@ Agora gere o material completo.
     function renderizarResultado(texto) {
       const painel = document.getElementById("resultado");
 
+      if (!painel) {
+        alert("Área de resultado não encontrada.");
+        return;
+      }
+
       if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
         const htmlConvertido = marked.parse(texto);
         const htmlSeguro = DOMPurify.sanitize(htmlConvertido);
@@ -926,13 +878,90 @@ Agora gere o material completo.
       }
     }
 
-    function mostrarPrompt() {
+    window.gerarMaterialComGemini = async function () {
+      const painel = document.getElementById("resultado");
+      const botao = document.getElementById("btnGerar");
+
+      if (!painel) {
+        alert("Erro: área de resultado não encontrada.");
+        return;
+      }
+
+      if (!validarChave()) {
+        return;
+      }
+
+      const titulo = valor("titulo");
+      const tema = valor("tema");
+
+      if (!titulo && !tema) {
+        alert("Preencha pelo menos o título ou o tema.");
+        return;
+      }
+
+      if (botao) {
+        botao.disabled = true;
+        botao.innerText = "Gerando...";
+      }
+
+      painel.innerText = "Conectando com o Gemini... aguarde.";
+      mostrarStatus("Pedido enviado para o Gemini.", "ok");
+
+      const prompt = criarPromptTexto();
+      let ultimoErro = "";
+
+      try {
+        for (let i = 0; i < MODELOS_GEMINI.length; i++) {
+          const modeloAtual = MODELOS_GEMINI[i];
+
+          try {
+            mostrarStatus("Tentando gerar com o modelo: " + modeloAtual, "ok");
+
+            const textoGerado = await chamarGemini(modeloAtual, prompt);
+
+            if (textoGerado) {
+              renderizarResultado(textoGerado);
+              mostrarStatus("Material gerado com sucesso usando: " + modeloAtual, "ok");
+              return;
+            }
+
+          } catch (erroModelo) {
+            ultimoErro = erroModelo.message;
+            console.error("Erro com modelo " + modeloAtual + ":", erroModelo);
+          }
+        }
+
+        throw new Error(ultimoErro || "Nenhum modelo conseguiu gerar o material.");
+
+      } catch (erro) {
+        painel.innerText =
+          "Erro ao gerar material:\n\n" +
+          erro.message +
+          "\n\nPossíveis causas:\n" +
+          "1. A chave do Gemini está errada.\n" +
+          "2. A chave antiga foi bloqueada ou revogada.\n" +
+          "3. A API do Gemini não está ativa na sua conta.\n" +
+          "4. O navegador bloqueou a requisição.\n" +
+          "5. Sua chave ficou exposta e precisa ser trocada.\n\n" +
+          "Solução: crie uma chave nova no Google AI Studio, cole no código, salve e atualize a página.";
+
+        mostrarStatus("Erro ao gerar. Veja a mensagem no painel.", "erro");
+
+      } finally {
+        if (botao) {
+          botao.disabled = false;
+          botao.innerText = "Gerar Material com Gemini";
+        }
+      }
+    };
+
+    window.mostrarPrompt = function () {
       const prompt = criarPromptTexto();
       document.getElementById("resultado").innerText = prompt;
       mostrarStatus("Prompt exibido. Você pode copiar e testar manualmente no Gemini.", "ok");
-    }
+    };
 
-    async function copiarResultado() {
+    window.copiarResultado = async function () {
       const painel = document.getElementById("resultado");
       const texto = painel ? painel.innerText : "";
 
@@ -942,9 +971,9 @@ Agora gere o material completo.
       } catch (erro) {
         mostrarStatus("Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.", "erro");
       }
-    }
+    };
 
-    function limparTudo() {
+    window.limparTudo = function () {
       const campos = [
         "titulo",
         "tema",
@@ -975,7 +1004,7 @@ Agora gere o material completo.
       }
 
       mostrarStatus("Campos limpos.", "ok");
-    }
+    };
   </script>
 </body>
 </html>
