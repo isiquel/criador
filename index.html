@@ -283,7 +283,7 @@
 <body>
   <header>
     <h1>Gerador CPID de Materiais Bíblicos</h1>
-    <p>Revistas de EBD, lições bíblicas, apostilas, sermões, estudos, livros e devocionais com Gemini</p>
+    <p>Revistas de EBD, lições bíblicas, apostilas, sermões, estudos, livros e devocionais com Gemini 3.1 Flash-Lite</p>
   </header>
 
   <main class="container">
@@ -295,7 +295,7 @@
       </div>
 
       <div class="aviso">
-        Cada tipo de material tem sua própria estrutura. Sermão gera sermão, devocional gera devocional, estudo gera estudo, livro gera livro e revista gera revista.
+        Este código está configurado para usar primeiro o Gemini 3.1 Flash-Lite, que é o modelo que você mostrou no print.
       </div>
 
       <label for="tipo">Tipo de material</label>
@@ -401,9 +401,9 @@
     const GEMINI_API_KEY = "AIzaSyBU_sqQH3fkU_yMN59fSHIc8Nrb68mkFFs";
 
     const MODELOS_GEMINI = [
-      "gemini-2.0-flash",
       "gemini-3.1-flash-lite",
-      "gemini-3-flash-preview",
+      "gemini-3.1-flash-lite-preview",
+      "gemini-2.5-flash-lite",
       "gemini-2.5-flash"
     ];
 
@@ -826,7 +826,7 @@ Agora gere o material completo.
           generationConfig: {
             temperature: 0.7,
             topP: 0.95,
-            maxOutputTokens: 8192
+            maxOutputTokens: 4096
           }
         })
       });
@@ -905,7 +905,7 @@ Agora gere o material completo.
         botao.innerText = "Gerando...";
       }
 
-      painel.innerText = "Conectando com o Gemini... aguarde.";
+      painel.innerText = "Conectando com o Gemini 3.1 Flash-Lite... aguarde.";
       mostrarStatus("Pedido enviado para o Gemini.", "ok");
 
       const prompt = criarPromptTexto();
@@ -938,13 +938,15 @@ Agora gere o material completo.
         painel.innerText =
           "Erro ao gerar material:\n\n" +
           erro.message +
-          "\n\nPossíveis causas:\n" +
-          "1. A chave do Gemini está errada.\n" +
-          "2. A chave antiga foi bloqueada ou revogada.\n" +
-          "3. A API do Gemini não está ativa na sua conta.\n" +
-          "4. Nenhum dos modelos disponíveis funcionou na sua conta.\n" +
-          "5. Sua chave ficou exposta e precisa ser trocada.\n\n" +
-          "Solução: crie uma chave nova no Google AI Studio, cole no código, salve e atualize a página.";
+          "\n\nO que isso significa:\n" +
+          "1. Se aparecer QUOTA EXCEEDED, sua chave não tem cota disponível agora.\n" +
+          "2. Se aparecer MODEL NOT FOUND, o modelo não está disponível na sua chave.\n" +
+          "3. Se aparecer API KEY INVALID, a chave está errada ou foi revogada.\n\n" +
+          "Solução:\n" +
+          "- Confira sua chave no Google AI Studio.\n" +
+          "- Veja se o modelo 3.1 Flash-Lite está liberado para API.\n" +
+          "- Se necessário, crie uma chave nova.\n" +
+          "- Depois salve o código e atualize a página.";
 
         mostrarStatus("Erro ao gerar. Veja a mensagem no painel.", "erro");
 
