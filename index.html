@@ -285,7 +285,7 @@
 <body>
   <header>
     <h1>Gerador CPID de Materiais Bíblicos</h1>
-    <p>Revistas de EBD, lições bíblicas, apostilas, sermões, estudos e livros cristãos com Gemini</p>
+    <p>Revistas de EBD, lições bíblicas, apostilas, sermões, estudos, livros e devocionais com Gemini</p>
   </header>
 
   <main class="container">
@@ -297,7 +297,7 @@
       </div>
 
       <div class="aviso">
-        Preencha os campos e clique em “Gerar Material com Gemini”. O Gemini será o cérebro do aplicativo.
+        Agora cada tipo de material tem sua própria estrutura: sermão gera sermão, devocional gera devocional, livro gera livro, estudo gera estudo e revista gera revista.
       </div>
 
       <label for="tipo">Tipo de material</label>
@@ -350,12 +350,12 @@
 
       <div class="linha">
         <div>
-          <label for="quantidade">Quantidade de lições/capítulos</label>
-          <input id="quantidade" type="number" min="1" max="20" value="1" />
+          <label for="quantidade">Quantidade de lições/capítulos/dias</label>
+          <input id="quantidade" type="number" min="1" max="30" value="1" />
         </div>
 
         <div>
-          <label for="perguntas">Perguntas por lição</label>
+          <label for="perguntas">Perguntas por lição/capítulo</label>
           <input id="perguntas" type="number" min="1" max="10" value="5" />
         </div>
       </div>
@@ -400,23 +400,8 @@
   </div>
 
   <script>
-    /*
-      PASSO 1:
-      Cole sua chave nova do Gemini abaixo, dentro das aspas.
+    const GEMINI_API_KEY = "AIzaSyBJ9d1GCfN0SEtS0_b8-f9LbfZAJ9Cgx2Q;
 
-      Exemplo:
-      const GEMINI_API_KEY = "AIzaXXXXXXXXXXXXXXXXXXXX";
-
-      Atenção:
-      Se publicar este arquivo em GitHub público, sua chave ficará visível.
-    */
-
-    const GEMINI_API_KEY = "AIzaSyBJ9d1GCfN0SEtS0_b8-f9LbfZAJ9Cgx2Q";
-
-    /*
-      O primeiro modelo será tentado primeiro.
-      Se não funcionar, o sistema tenta os próximos.
-    */
     const MODELOS_GEMINI = [
       "gemini-2.5-flash",
       "gemini-2.0-flash",
@@ -424,33 +409,13 @@
     ];
 
     document.addEventListener("DOMContentLoaded", function () {
-      const btnGerar = document.getElementById("btnGerar");
-      const btnPrompt = document.getElementById("btnPrompt");
-      const btnCopiar = document.getElementById("btnCopiar");
-      const btnImprimir = document.getElementById("btnImprimir");
-      const btnLimpar = document.getElementById("btnLimpar");
-
-      if (btnGerar) {
-        btnGerar.addEventListener("click", gerarMaterialComGemini);
-      }
-
-      if (btnPrompt) {
-        btnPrompt.addEventListener("click", mostrarPrompt);
-      }
-
-      if (btnCopiar) {
-        btnCopiar.addEventListener("click", copiarResultado);
-      }
-
-      if (btnImprimir) {
-        btnImprimir.addEventListener("click", function () {
-          window.print();
-        });
-      }
-
-      if (btnLimpar) {
-        btnLimpar.addEventListener("click", limparTudo);
-      }
+      document.getElementById("btnGerar").addEventListener("click", gerarMaterialComGemini);
+      document.getElementById("btnPrompt").addEventListener("click", mostrarPrompt);
+      document.getElementById("btnCopiar").addEventListener("click", copiarResultado);
+      document.getElementById("btnImprimir").addEventListener("click", function () {
+        window.print();
+      });
+      document.getElementById("btnLimpar").addEventListener("click", limparTudo);
 
       mostrarStatus("Aplicativo carregado. Pode gerar o material.", "ok");
     });
@@ -492,10 +457,282 @@
       const editora = valor("editora") || "CPID - Casa Publicadora da Igreja de Deus";
       const orientacoes = valor("orientacoes") || "Sem orientações adicionais.";
 
+      let estrutura = "";
+
+      if (tipo === "Sermão") {
+        estrutura = `
+GERE SOMENTE UM SERMÃO.
+
+Estrutura obrigatória:
+# Título do Sermão
+# Texto Base
+# Tema
+# Introdução
+# Proposição
+# Frase de Transição
+# I - Primeiro ponto
+# II - Segundo ponto
+# III - Terceiro ponto
+# Aplicação para a Igreja
+# Conclusão
+# Apelo
+
+Regras específicas:
+- Não faça capa de revista.
+- Não faça sumário de revista.
+- Não coloque perguntas de EBD, a menos que eu peça nas orientações.
+- Use linguagem de púlpito, pastoral, espiritual e bíblica.
+- Desenvolva bem cada ponto.
+- Inclua aplicações práticas para a vida cristã.
+`;
+      }
+
+      else if (tipo === "Devocional") {
+        estrutura = `
+GERE SOMENTE UM DEVOCIONAL.
+
+Se a quantidade for 1, crie um devocional único.
+Se a quantidade for maior que 1, crie uma sequência de devocionais conforme a quantidade informada.
+
+Estrutura obrigatória para cada devocional:
+# Devocional
+## Título
+## Texto Bíblico
+## Meditação
+## Aplicação do Dia
+## Pergunta para Reflexão
+## Oração
+
+Regras específicas:
+- Não faça formato de revista.
+- Não faça sumário, texto áureo ou verdade prática.
+- Não faça tópicos longos como sermão.
+- Use linguagem íntima, pastoral, devocional e reflexiva.
+- A meditação deve tocar o coração e conduzir à oração.
+`;
+      }
+
+      else if (tipo === "Estudo bíblico") {
+        estrutura = `
+GERE SOMENTE UM ESTUDO BÍBLICO.
+
+Estrutura obrigatória:
+# Título do Estudo
+# Texto Base
+# Objetivo do Estudo
+# Introdução
+# Contexto Bíblico
+# Explicação do Texto
+# Ensinamentos Principais
+# Aplicações Práticas
+# Perguntas para Discussão
+# Conclusão
+
+Regras específicas:
+- Não faça formato de revista de EBD.
+- Não faça sermão com apelo final, a menos que faça sentido.
+- O foco deve ser ensino, explicação bíblica e aplicação.
+- Use linguagem clara, didática e bíblica.
+`;
+      }
+
+      else if (tipo === "Livro cristão") {
+        estrutura = `
+GERE SOMENTE UM LIVRO CRISTÃO.
+
+A quantidade informada deve ser entendida como quantidade de capítulos.
+
+Estrutura obrigatória:
+# Capa Textual
+# Título
+# Autor
+# Editora / Ministério
+# Apresentação
+# Prefácio
+# Sumário
+
+Depois desenvolva os capítulos:
+## Capítulo 1
+## Capítulo 2
+## Capítulo 3
+E assim por diante, conforme a quantidade informada.
+
+Cada capítulo deve ter:
+- Título do capítulo
+- Introdução do capítulo
+- Desenvolvimento bíblico e pastoral
+- Aplicações práticas
+- Conclusão do capítulo
+
+Finalize com:
+# Conclusão Geral
+# Palavra Final ao Leitor
+
+Regras específicas:
+- Não faça formato de revista de EBD.
+- Não coloque texto áureo, verdade prática e revisão de conteúdo.
+- Escreva com estilo de livro cristão, organizado, profundo e pastoral.
+`;
+      }
+
+      else if (tipo === "Apostila teológica") {
+        estrutura = `
+GERE SOMENTE UMA APOSTILA TEOLÓGICA.
+
+A quantidade informada deve ser entendida como quantidade de aulas ou capítulos.
+
+Estrutura obrigatória:
+# Capa Textual
+# Título da Apostila
+# Autor
+# Editora / Ministério
+# Apresentação
+# Ementa
+# Objetivo Geral
+# Objetivos Específicos
+# Sumário
+
+Para cada aula ou capítulo:
+## Aula / Capítulo
+## Tema da Aula
+## Texto Bíblico Base
+## Introdução
+## Desenvolvimento Teológico
+## Fundamentação Bíblica
+## Aplicação Ministerial
+## Resumo da Aula
+## Exercícios de Fixação
+
+Finalize com:
+# Conclusão Geral
+# Bibliografia Bíblica Sugerida
+
+Regras específicas:
+- Não faça sermão.
+- Não faça devocional.
+- Não faça revista de EBD.
+- O foco deve ser ensino teológico organizado.
+`;
+      }
+
+      else if (tipo === "Revista de EBD para professor") {
+        estrutura = `
+GERE SOMENTE UMA REVISTA DE EBD PARA PROFESSOR.
+
+A quantidade informada deve ser entendida como quantidade de lições.
+
+Estrutura obrigatória:
+# Capa Textual
+# Título da Revista
+# Tema do Trimestre
+# Comentarista
+# Editora / Ministério
+# Apresentação
+# Sumário
+
+Para cada lição:
+## Lição
+## Título da Lição
+## Texto Áureo
+## Verdade Prática
+## Leitura Bíblica em Classe
+## Objetivos da Lição
+## Palavra-chave
+## Introdução
+## I - Primeiro tópico
+## II - Segundo tópico
+## III - Terceiro tópico
+## Auxílio ao Professor
+## Aplicação Pessoal
+## Sinopse da Lição
+## Conclusão
+## Revisando o Conteúdo
+
+No Revisando o Conteúdo:
+- Inclua perguntas e respostas.
+- A quantidade de perguntas deve seguir o campo informado.
+
+Regras específicas:
+- Esta versão é para professor.
+- Inclua respostas das perguntas.
+- Use linguagem didática e pastoral.
+`;
+      }
+
+      else if (tipo === "Revista de EBD para aluno") {
+        estrutura = `
+GERE SOMENTE UMA REVISTA DE EBD PARA ALUNO.
+
+A quantidade informada deve ser entendida como quantidade de lições.
+
+Estrutura obrigatória:
+# Capa Textual
+# Título da Revista
+# Tema do Trimestre
+# Editora / Ministério
+# Apresentação
+# Sumário
+
+Para cada lição:
+## Lição
+## Título da Lição
+## Texto Áureo
+## Verdade Prática
+## Leitura Bíblica em Classe
+## Objetivos da Lição
+## Introdução
+## I - Primeiro tópico
+## II - Segundo tópico
+## III - Terceiro tópico
+## Aplicação Pessoal
+## Conclusão
+## Revisando o Conteúdo
+
+No Revisando o Conteúdo:
+- Inclua somente as perguntas.
+- Não inclua respostas, pois é revista do aluno.
+
+Regras específicas:
+- Esta versão é para aluno.
+- Não coloque respostas das perguntas.
+- Use linguagem clara, bíblica e acessível.
+`;
+      }
+
+      else if (tipo === "Lição bíblica completa") {
+        estrutura = `
+GERE SOMENTE UMA LIÇÃO BÍBLICA COMPLETA.
+
+Estrutura obrigatória:
+# Título da Lição
+# Texto Áureo
+# Verdade Prática
+# Leitura Bíblica em Classe
+# Objetivos da Lição
+# Introdução
+# I - Primeiro tópico
+# II - Segundo tópico
+# III - Terceiro tópico
+# Aplicação Pessoal
+# Sinopse da Lição
+# Conclusão
+# Revisando o Conteúdo
+
+No Revisando o Conteúdo:
+- Inclua perguntas e respostas conforme a quantidade informada.
+
+Regras específicas:
+- Não faça livro.
+- Não faça apostila.
+- Não faça devocional.
+- Faça uma lição organizada para ensino bíblico.
+`;
+      }
+
       return `
 Você é um assistente editorial cristão, bíblico, teológico e pastoral.
 
-Crie um material completo seguindo exatamente as informações abaixo:
+Crie o material conforme as informações abaixo.
 
 TIPO DE MATERIAL:
 ${tipo}
@@ -515,10 +752,10 @@ ${publico}
 LINGUAGEM:
 ${linguagem}
 
-QUANTIDADE DE LIÇÕES OU CAPÍTULOS:
+QUANTIDADE DE LIÇÕES, CAPÍTULOS OU DIAS:
 ${quantidade}
 
-PERGUNTAS POR LIÇÃO:
+PERGUNTAS POR LIÇÃO OU CAPÍTULO:
 ${perguntas}
 
 COMENTARISTA / AUTOR:
@@ -530,7 +767,7 @@ ${editora}
 ORIENTAÇÕES ADICIONAIS:
 ${orientacoes}
 
-REGRAS DE PRODUÇÃO:
+REGRAS GERAIS:
 1. Escreva em português do Brasil.
 2. Use linguagem bíblica, pastoral, reverente, didática e organizada.
 3. Crie conteúdo original.
@@ -541,53 +778,11 @@ REGRAS DE PRODUÇÃO:
 8. Não invente citações de autores.
 9. Use a Bíblia como base principal.
 10. Use formatação em Markdown com títulos e subtítulos.
+11. Respeite exatamente o tipo de material escolhido.
+12. Não misture estrutura de revista, sermão, livro, apostila, estudo e devocional.
 
-SE FOR REVISTA OU LIÇÃO, USE ESTA ESTRUTURA:
-# Capa textual
-- Título
-- Tema
-- Comentarista
-- Editora / Ministério
-
-# Apresentação
-# Sumário
-
-Para cada lição:
-## Lição
-## Título da lição
-## Texto Áureo
-## Verdade Prática
-## Leitura Bíblica em Classe
-## Objetivos da Lição
-## Introdução
-## I - Primeiro tópico
-## II - Segundo tópico
-## III - Terceiro tópico
-## Aplicação Pessoal
-## Sinopse da Lição
-## Conclusão
-## Revisando o Conteúdo
-Inclua perguntas e respostas, conforme a quantidade solicitada.
-
-SE FOR SERMÃO, USE ESTA ESTRUTURA:
-# Título
-# Texto Base
-# Introdução
-# Proposição
-# Desenvolvimento com 3 pontos principais
-# Aplicação
-# Conclusão
-# Apelo
-
-SE FOR APOSTILA OU LIVRO, USE ESTA ESTRUTURA:
-# Capa textual
-# Apresentação
-# Sumário
-# Capítulos
-# Desenvolvimento bíblico e teológico
-# Aplicações práticas
-# Perguntas para revisão
-# Conclusão geral
+ESTRUTURA ESPECÍFICA PARA ESTE TIPO DE MATERIAL:
+${estrutura}
 
 Agora gere o material completo.
       `;
