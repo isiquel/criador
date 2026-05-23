@@ -293,7 +293,7 @@
       <h2>Configurar Material</h2>
 
       <div class="perigo">
-        Atenção: este modelo é em arquivo único para teste. Se colocar sua chave aqui e subir no GitHub público, ela ficará exposta. Use com cuidado.
+        Atenção: este modelo é em HTML único para teste. Se você colocar a chave aqui e publicar no GitHub público, ela ficará exposta.
       </div>
 
       <div class="aviso">
@@ -313,13 +313,13 @@
       </select>
 
       <label for="titulo">Título</label>
-      <input id="titulo" type="text" placeholder="Ex: Em Defesa da Fé Cristã" />
+      <input id="titulo" type="text" placeholder="Ex: União" />
 
       <label for="tema">Tema principal</label>
-      <input id="tema" type="text" placeholder="Ex: Apologética cristã para jovens" />
+      <input id="tema" type="text" placeholder="Ex: A bênção da união" />
 
       <label for="textoBase">Texto bíblico base</label>
-      <input id="textoBase" type="text" placeholder="Ex: 1 Pedro 3.15; Judas 3; 2 Timóteo 4.2" />
+      <input id="textoBase" type="text" placeholder="Ex: Salmos 133" />
 
       <div class="linha">
         <div>
@@ -367,22 +367,22 @@
       <input id="editora" type="text" value="CPID - Casa Publicadora da Igreja de Deus" />
 
       <label for="orientacoes">Orientações adicionais</label>
-      <textarea id="orientacoes" placeholder="Ex: seguir modelo de revista do professor, com texto áureo, verdade prática, sinopse, conclusão e perguntas com respostas."></textarea>
+      <textarea id="orientacoes" placeholder="Ex: crie uma mensagem bíblica forte, pastoral e bem organizada."></textarea>
 
-      <button class="btn-principal" id="btnGerar" onclick="gerarMaterialComGemini()">
+      <button class="btn-principal" id="btnGerar" type="button">
         Gerar Material com Gemini
       </button>
 
-      <button class="btn-prompt" onclick="mostrarPrompt()">
+      <button class="btn-prompt" id="btnPrompt" type="button">
         Ver Prompt Antes de Gerar
       </button>
 
       <div class="botoes">
-        <button class="btn-copiar" onclick="copiarResultado()">Copiar Texto</button>
-        <button class="btn-imprimir" onclick="window.print()">Imprimir / Salvar PDF</button>
+        <button class="btn-copiar" id="btnCopiar" type="button">Copiar Texto</button>
+        <button class="btn-imprimir" id="btnImprimir" type="button">Imprimir / Salvar PDF</button>
       </div>
 
-      <button class="btn-limpar" onclick="limparTudo()">Limpar Tudo</button>
+      <button class="btn-limpar" id="btnLimpar" type="button">Limpar Tudo</button>
 
       <div id="status" class="status"></div>
     </section>
@@ -401,25 +401,72 @@
 
   <script>
     /*
-      PASSO MAIS IMPORTANTE:
+      PASSO 1:
+      Cole sua chave nova do Gemini abaixo, dentro das aspas.
 
-      1. Pegue uma chave nova no Google AI Studio.
-      2. Cole abaixo, dentro das aspas.
-      3. Não publique essa chave em GitHub público.
+      Exemplo:
+      const GEMINI_API_KEY = "AIzaXXXXXXXXXXXXXXXXXXXX";
+
+      Atenção:
+      Se publicar este arquivo em GitHub público, sua chave ficará visível.
     */
 
-    const GEMINI_API_KEY = "AIzaSyBJ9d1GCfN0SEtS0_b8-f9LbfZAJ9Cgx2Q;
+    const GEMINI_API_KEY = "AIzaSyBJ9d1GCfN0SEtS0_b8-f9LbfZAJ9Cgx2Q";
 
-    const MODELO_GEMINI = "gemini-2.5-flash";
+    /*
+      O primeiro modelo será tentado primeiro.
+      Se não funcionar, o sistema tenta os próximos.
+    */
+    const MODELOS_GEMINI = [
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash"
+    ];
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const btnGerar = document.getElementById("btnGerar");
+      const btnPrompt = document.getElementById("btnPrompt");
+      const btnCopiar = document.getElementById("btnCopiar");
+      const btnImprimir = document.getElementById("btnImprimir");
+      const btnLimpar = document.getElementById("btnLimpar");
+
+      if (btnGerar) {
+        btnGerar.addEventListener("click", gerarMaterialComGemini);
+      }
+
+      if (btnPrompt) {
+        btnPrompt.addEventListener("click", mostrarPrompt);
+      }
+
+      if (btnCopiar) {
+        btnCopiar.addEventListener("click", copiarResultado);
+      }
+
+      if (btnImprimir) {
+        btnImprimir.addEventListener("click", function () {
+          window.print();
+        });
+      }
+
+      if (btnLimpar) {
+        btnLimpar.addEventListener("click", limparTudo);
+      }
+
+      mostrarStatus("Aplicativo carregado. Pode gerar o material.", "ok");
+    });
 
     function valor(id) {
-      return document.getElementById(id).value.trim();
+      const campo = document.getElementById(id);
+      return campo ? campo.value.trim() : "";
     }
 
     function mostrarStatus(mensagem, tipo) {
       const status = document.getElementById("status");
-      status.innerText = mensagem;
-      status.className = "status " + tipo;
+
+      if (status) {
+        status.innerText = mensagem;
+        status.className = "status " + tipo;
+      }
     }
 
     function validarChave() {
@@ -427,13 +474,6 @@
         alert("Você ainda não colocou a chave nova do Gemini no código.");
         mostrarStatus("Coloque sua chave nova do Gemini na linha GEMINI_API_KEY.", "erro");
         return false;
-      }
-
-      if (!GEMINI_API_KEY.startsWith("AIza")) {
-        const confirmar = confirm("A chave do Gemini normalmente começa com AIza. Deseja tentar mesmo assim?");
-        if (!confirmar) {
-          return false;
-        }
       }
 
       return true;
@@ -444,8 +484,8 @@
       const titulo = valor("titulo") || "Material Bíblico";
       const tema = valor("tema") || "Tema bíblico a definir";
       const textoBase = valor("textoBase") || "Texto bíblico a definir";
-      const publico = valor("publico");
-      const linguagem = valor("linguagem");
+      const publico = valor("publico") || "Igreja em geral";
+      const linguagem = valor("linguagem") || "Pastoral, bíblica e didática";
       const quantidade = valor("quantidade") || "1";
       const perguntas = valor("perguntas") || "5";
       const autor = valor("autor") || "Comentarista a definir";
@@ -493,18 +533,16 @@ ${orientacoes}
 REGRAS DE PRODUÇÃO:
 1. Escreva em português do Brasil.
 2. Use linguagem bíblica, pastoral, reverente, didática e organizada.
-3. Não copie conteúdo de editoras conhecidas.
+3. Crie conteúdo original.
 4. Não mencione CPAD.
-5. Crie um conteúdo original.
-6. Use referências bíblicas coerentes.
-7. Organize como material de Escola Bíblica Dominical quando o tipo for revista ou lição.
-8. Quando for revista de EBD para professor, inclua respostas das perguntas.
-9. Use formatação em Markdown com títulos e subtítulos.
-10. Evite frases genéricas demais; aprofunde os tópicos.
-11. Mantenha fidelidade bíblica, doutrinária e aplicação prática.
-12. Não invente citações de autores. Use a Bíblia como base principal.
+5. Use referências bíblicas coerentes.
+6. Evite frases genéricas demais; aprofunde os tópicos.
+7. Mantenha fidelidade bíblica, doutrinária e aplicação prática.
+8. Não invente citações de autores.
+9. Use a Bíblia como base principal.
+10. Use formatação em Markdown com títulos e subtítulos.
 
-ESTRUTURA DESEJADA PARA REVISTA OU LIÇÃO:
+SE FOR REVISTA OU LIÇÃO, USE ESTA ESTRUTURA:
 # Capa textual
 - Título
 - Tema
@@ -531,7 +569,7 @@ Para cada lição:
 ## Revisando o Conteúdo
 Inclua perguntas e respostas, conforme a quantidade solicitada.
 
-ESTRUTURA PARA SERMÃO:
+SE FOR SERMÃO, USE ESTA ESTRUTURA:
 # Título
 # Texto Base
 # Introdução
@@ -541,12 +579,12 @@ ESTRUTURA PARA SERMÃO:
 # Conclusão
 # Apelo
 
-ESTRUTURA PARA APOSTILA OU LIVRO:
+SE FOR APOSTILA OU LIVRO, USE ESTA ESTRUTURA:
 # Capa textual
 # Apresentação
 # Sumário
 # Capítulos
-# Desenvolvimento teológico
+# Desenvolvimento bíblico e teológico
 # Aplicações práticas
 # Perguntas para revisão
 # Conclusão geral
@@ -556,12 +594,17 @@ Agora gere o material completo.
     }
 
     async function gerarMaterialComGemini() {
-      if (!validarChave()) {
+      const painel = document.getElementById("resultado");
+      const botao = document.getElementById("btnGerar");
+
+      if (!painel) {
+        alert("Erro: área de resultado não encontrada.");
         return;
       }
 
-      const btnGerar = document.getElementById("btnGerar");
-      const painel = document.getElementById("resultado");
+      if (!validarChave()) {
+        return;
+      }
 
       const titulo = valor("titulo");
       const tema = valor("tema");
@@ -571,87 +614,128 @@ Agora gere o material completo.
         return;
       }
 
+      botao.disabled = true;
+      botao.innerText = "Gerando...";
+      painel.innerText = "Conectando com o Gemini... aguarde.";
+      mostrarStatus("Pedido enviado para o Gemini.", "ok");
+
       const prompt = criarPromptTexto();
 
-      btnGerar.disabled = true;
-      btnGerar.innerText = "Gerando com Gemini...";
-      painel.innerHTML = "Consultando a inteligência artificial...";
-      mostrarStatus("Gerando material com Gemini...", "ok");
+      let ultimoErro = "";
 
       try {
-        const url = "https://generativelanguage.googleapis.com/v1beta/models/" + MODELO_GEMINI + ":generateContent?key=" + GEMINI_API_KEY;
+        for (let i = 0; i < MODELOS_GEMINI.length; i++) {
+          const modeloAtual = MODELOS_GEMINI[i];
 
-        const resposta = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [
-                  {
-                    text: prompt
-                  }
-                ]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              topP: 0.95,
-              maxOutputTokens: 8192
+          try {
+            mostrarStatus("Tentando gerar com o modelo: " + modeloAtual, "ok");
+
+            const textoGerado = await chamarGemini(modeloAtual, prompt);
+
+            if (textoGerado) {
+              renderizarResultado(textoGerado);
+              mostrarStatus("Material gerado com sucesso usando: " + modeloAtual, "ok");
+              return;
             }
-          })
-        });
 
-        const dados = await resposta.json();
-
-        if (!resposta.ok) {
-          const mensagemErro = dados.error && dados.error.message
-            ? dados.error.message
-            : "Erro desconhecido ao chamar o Gemini.";
-
-          throw new Error(mensagemErro);
+          } catch (erroModelo) {
+            ultimoErro = erroModelo.message;
+            console.error("Erro com modelo " + modeloAtual + ":", erroModelo);
+          }
         }
 
-        if (
-          !dados.candidates ||
-          !dados.candidates[0] ||
-          !dados.candidates[0].content ||
-          !dados.candidates[0].content.parts ||
-          !dados.candidates[0].content.parts[0] ||
-          !dados.candidates[0].content.parts[0].text
-        ) {
-          throw new Error("O Gemini não retornou um texto válido.");
-        }
-
-        const texto = dados.candidates[0].content.parts[0].text;
-
-        const htmlConvertido = marked.parse(texto);
-        const htmlSeguro = DOMPurify.sanitize(htmlConvertido);
-
-        painel.innerHTML = htmlSeguro;
-        mostrarStatus("Material gerado com sucesso.", "ok");
+        throw new Error(ultimoErro || "Nenhum modelo conseguiu gerar o material.");
 
       } catch (erro) {
         painel.innerText =
           "Erro ao gerar material:\n\n" +
           erro.message +
           "\n\nPossíveis causas:\n" +
-          "1. Chave do Gemini inválida.\n" +
-          "2. Chave antiga foi bloqueada ou revogada.\n" +
-          "3. API do Gemini não está ativa na sua conta.\n" +
-          "4. O modelo escolhido não está disponível.\n" +
-          "5. O navegador bloqueou a requisição.\n\n" +
-          "Confira sua chave no Google AI Studio e tente novamente.";
+          "1. A chave do Gemini está errada.\n" +
+          "2. A chave antiga foi bloqueada ou revogada.\n" +
+          "3. A API do Gemini não está ativa na sua conta.\n" +
+          "4. O navegador bloqueou a requisição.\n" +
+          "5. Sua chave ficou exposta e precisa ser trocada.\n\n" +
+          "Solução: crie uma chave nova no Google AI Studio, cole no código, salve e atualize a página.";
 
-        mostrarStatus("Erro ao gerar material. Verifique a chave e tente novamente.", "erro");
-        console.error("Erro detalhado:", erro);
+        mostrarStatus("Erro ao gerar. Veja a mensagem no painel.", "erro");
 
       } finally {
-        btnGerar.disabled = false;
-        btnGerar.innerText = "Gerar Material com Gemini";
+        botao.disabled = false;
+        botao.innerText = "Gerar Material com Gemini";
+      }
+    }
+
+    async function chamarGemini(modelo, prompt) {
+      const url =
+        "https://generativelanguage.googleapis.com/v1beta/models/" +
+        modelo +
+        ":generateContent?key=" +
+        encodeURIComponent(GEMINI_API_KEY);
+
+      const resposta = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.95,
+            maxOutputTokens: 8192
+          }
+        })
+      });
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        const mensagem =
+          dados &&
+          dados.error &&
+          dados.error.message
+            ? dados.error.message
+            : "Erro desconhecido na API do Gemini.";
+
+        throw new Error(mensagem);
+      }
+
+      const texto =
+        dados &&
+        dados.candidates &&
+        dados.candidates[0] &&
+        dados.candidates[0].content &&
+        dados.candidates[0].content.parts &&
+        dados.candidates[0].content.parts[0] &&
+        dados.candidates[0].content.parts[0].text
+          ? dados.candidates[0].content.parts[0].text
+          : "";
+
+      if (!texto) {
+        throw new Error("O Gemini respondeu, mas não retornou texto.");
+      }
+
+      return texto;
+    }
+
+    function renderizarResultado(texto) {
+      const painel = document.getElementById("resultado");
+
+      if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
+        const htmlConvertido = marked.parse(texto);
+        const htmlSeguro = DOMPurify.sanitize(htmlConvertido);
+        painel.innerHTML = htmlSeguro;
+      } else {
+        painel.innerText = texto;
       }
     }
 
@@ -662,7 +746,8 @@ Agora gere o material completo.
     }
 
     async function copiarResultado() {
-      const texto = document.getElementById("resultado").innerText;
+      const painel = document.getElementById("resultado");
+      const texto = painel ? painel.innerText : "";
 
       try {
         await navigator.clipboard.writeText(texto);
@@ -673,17 +758,34 @@ Agora gere o material completo.
     }
 
     function limparTudo() {
-      document.getElementById("titulo").value = "";
-      document.getElementById("tema").value = "";
-      document.getElementById("textoBase").value = "";
-      document.getElementById("autor").value = "";
-      document.getElementById("editora").value = "CPID - Casa Publicadora da Igreja de Deus";
-      document.getElementById("orientacoes").value = "";
-      document.getElementById("quantidade").value = "1";
-      document.getElementById("perguntas").value = "5";
+      const campos = [
+        "titulo",
+        "tema",
+        "textoBase",
+        "autor",
+        "orientacoes"
+      ];
 
-      document.getElementById("resultado").innerText =
-        "O resultado aparecerá aqui. Preencha os campos e clique em “Gerar Material com Gemini”.";
+      campos.forEach(function (id) {
+        const campo = document.getElementById(id);
+        if (campo) {
+          campo.value = "";
+        }
+      });
+
+      const quantidade = document.getElementById("quantidade");
+      const perguntas = document.getElementById("perguntas");
+      const editora = document.getElementById("editora");
+      const resultado = document.getElementById("resultado");
+
+      if (quantidade) quantidade.value = "1";
+      if (perguntas) perguntas.value = "5";
+      if (editora) editora.value = "CPID - Casa Publicadora da Igreja de Deus";
+
+      if (resultado) {
+        resultado.innerText =
+          "O resultado aparecerá aqui. Preencha os campos e clique em “Gerar Material com Gemini”.";
+      }
 
       mostrarStatus("Campos limpos.", "ok");
     }
